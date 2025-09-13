@@ -68,20 +68,19 @@
         <h3>Speed Challenge</h3>
       </article>
 
-      <article class="mode-card" (click)="openModal('endless')">
+      <article class="mode-card" (click)="openModal('challenge')">
         <div class="icon">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
-              d="M18 14c-2 0-4-4-6-4s-4 4-6 4a3 3 0 0 1 0-6c2 0 4 4 6 4s4-4 6-4a3 3 0 0 1 0 6z"
+              d="M12 2l3 7h7l-5.6 4.1L18.8 22 12 17.6 5.2 22l2.4-8.9L2 9h7z"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
-              stroke-linecap="round"
               stroke-linejoin="round"
             />
           </svg>
         </div>
-        <h3>Endless Mode</h3>
+        <h3>Challenge Mode</h3>
       </article>
     </div>
   </section>
@@ -109,174 +108,27 @@
 
     <div class="modal-body" [ngSwitch]="modalType">
       <ng-container *ngSwitchCase="'play'">
-        <p>Ready to play? Choose your difficulty and press Start.</p>
-        <div class="modal-actions">
-          <button class="btn btn-primary" (click)="startGame()">Start</button>
-          <button class="btn btn-secondary" (click)="closeModal()">
-            Cancel
-          </button>
-        </div>
+        <app-play-start></app-play-start>
       </ng-container>
 
       <ng-container *ngSwitchCase="'howto'">
-        <section class="howto">
-          <h2 class="howto-title">How to Play</h2>
-          <p class="howto-lead">
-            Welcome to the classic Snake game! Guide your slithery friend to eat
-            as much food as possible, but be careful not to run into walls or
-            your own ever-growing tail.
-          </p>
-
-          <div class="howto-grid">
-            <div class="howto-left">
-              <article class="howto-item">
-                <div class="howto-bullet" aria-hidden="true">
-                  <svg viewBox="0 0 24 24">
-                    <path
-                      d="M6 15l6-6 6 6"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3>Controls</h3>
-                  <p>
-                    Use the <span class="kbd">Arrow Keys</span> on your keyboard
-                    to change the snake’s direction.
-                  </p>
-                </div>
-              </article>
-
-              <article class="howto-item">
-                <div class="howto-bullet" aria-hidden="true">
-                  <svg viewBox="0 0 24 24">
-                    <path
-                      d="M8 21h8M12 17v4M6 4h12v2a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V4zM6 6H4a3 3 0 0 0 3 3M18 6h2a3 3 0 0 1-3 3"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3>Scoring</h3>
-                  <p>
-                    Each piece of food you eat earns you points. The more you
-                    eat, the higher your score!
-                  </p>
-                </div>
-              </article>
-
-              <article class="howto-item">
-                <div class="howto-bullet" aria-hidden="true">
-                  <svg viewBox="0 0 24 24">
-                    <path
-                      d="M4 12a8 8 0 1 1 16 0v3a2 2 0 0 1-2 2h-1v3H7v-3H6a2 2 0 0 1-2-2v-3z"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linejoin="round"
-                    />
-                    <path
-                      d="M9 12h0M15 12h0"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3>Game Over</h3>
-                  <p>
-                    The game ends if the snake collides with the walls or its
-                    own body. Watch out!
-                  </p>
-                </div>
-              </article>
-            </div>
-
-            <div class="howto-right" aria-hidden="true">
-              <div class="pad">
-                <button class="pad-btn up" tabindex="-1">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M12 6l-5 6h10l-5-6z" />
-                  </svg>
-                </button>
-
-                <button class="pad-btn left" tabindex="-1">
-                  <svg viewBox="0 0 24 24"><path d="M6 12l6 5V7l-6 5z" /></svg>
-                </button>
-
-                <span class="pad-dot"></span>
-
-                <button class="pad-btn right" tabindex="-1">
-                  <svg viewBox="0 0 24 24">
-                    <path d="M18 12l-6-5v10l6-5z" />
-                  </svg>
-                </button>
-
-                <button class="pad-btn down" tabindex="-1">
-                  <svg viewBox="0 0 24 24"><path d="M12 18l5-6H7l5 6z" /></svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <app-how-to-play></app-how-to-play>
       </ng-container>
 
       <ng-container *ngSwitchCase="'settings'">
-        <section class="settings">
-          <h2 class="settings-title">Settings</h2>
-          <p class="settings-lead">Customize your game experience.</p>
+        <app-settings></app-settings>
+      </ng-container>
 
-          <div class="settings-card">
-            <div class="row">
-              <div class="row-text">
-                <div class="row-title">Sound Effects</div>
-                <div class="row-desc">
-                  Enable or disable game sound effects.
-                </div>
-              </div>
+      <ng-container *ngSwitchCase="'classic'">
+        <app-classic-mode></app-classic-mode>
+      </ng-container>
 
-              <label class="switch">
-                <input
-                  type="checkbox"
-                  [checked]="sfxEnabled"
-                  (change)="toggleSfx($event)"
-                  aria-label="Toggle sound effects"
-                />
-                <span class="slider"></span>
-              </label>
-            </div>
+      <ng-container *ngSwitchCase="'speed'">
+        <app-speed-mode></app-speed-mode>
+      </ng-container>
 
-            <div class="row">
-              <div class="row-text">
-                <div class="row-title">Music Volume</div>
-                <div class="row-desc">Adjust the volume of the game music.</div>
-              </div>
-
-              <div class="range-wrap">
-                <input
-                  class="range"
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="1"
-                  [value]="musicVolume"
-                  (input)="changeMusicVol($event)"
-                  aria-label="Music volume"
-                />
-                <span class="range-value">{{ musicVolume }}</span>
-              </div>
-            </div>
-          </div>
-        </section>
+      <ng-container *ngSwitchCase="'challenge'">
+        <app-challenge-mode></app-challenge-mode>
       </ng-container>
     </div>
   </div>

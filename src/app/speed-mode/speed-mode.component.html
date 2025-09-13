@@ -1,0 +1,116 @@
+<section class="speed">
+  <h2 class="speed-title">Speed Challenge</h2>
+  <p class="speed-lead">
+    The pace ramps up fast. React quickly, keep control, and chase the highest
+    score.
+  </p>
+
+  <div class="speed-card">
+    <div class="speed-grid">
+      <div class="speed-left">
+        <h3>Rules</h3>
+        <ul class="rules">
+          <li>
+            <span class="dot"></span>
+            <span class="text">
+              Snake speed increases <strong>gradually</strong> as you eat fruit.
+            </span>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <span class="text">
+              Maintain streaks to boost score multipliers.
+            </span>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <span class="text">
+              Colliding with walls or your tail ends the run instantly.
+            </span>
+          </li>
+        </ul>
+
+        <div class="options">
+          <label class="opt">
+            <span>Starting Speed</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                [(ngModel)]="speedStart"
+                aria-label="Starting speed"
+              />
+              <span class="range-value">{{ speedStart }}</span>
+            </div>
+          </label>
+
+          <label class="opt">
+            <span>Acceleration</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="0"
+                max="3"
+                step="0.1"
+                [(ngModel)]="accelRate"
+                aria-label="Acceleration per fruit"
+              />
+              <span class="range-value">{{ accelRate }}</span>
+            </div>
+          </label>
+
+          <label class="opt">
+            <span>Time Attack (sec)</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="30"
+                max="300"
+                step="10"
+                [(ngModel)]="timeAttack"
+                aria-label="Time attack duration"
+              />
+              <span class="range-value">{{ timeAttack }}</span>
+            </div>
+          </label>
+
+          <label class="opt">
+            <span>Obstacles</span>
+            <label class="switch small">
+              <input type="checkbox" [(ngModel)]="obstaclesOn" />
+              <span class="slider"></span>
+            </label>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" (click)="onStart()">Start</button>
+        </div>
+      </div>
+
+      <div class="speed-right" aria-hidden="true">
+        <div class="speedometer">
+          <div class="dial">
+            <div class="tick t1"></div>
+            <div class="tick t2"></div>
+            <div class="tick t3"></div>
+            <div class="tick t4"></div>
+            <div
+              class="needle"
+              [style.transform]="'translateX(-1px) ' + needleDeg"
+            ></div>
+          </div>
+          <div class="legend">
+            <span>Slow</span>
+            <span>Fast</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

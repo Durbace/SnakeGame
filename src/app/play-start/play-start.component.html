@@ -1,0 +1,128 @@
+<section class="play">
+  <h2 class="play-title">Ready to Play?</h2>
+  <p class="play-lead">
+    Choose your difficulty and tweak a few options. Good luck!
+  </p>
+
+  <div class="play-card">
+    <div class="play-grid">
+      <div class="play-left">
+        <h3>Difficulty</h3>
+
+        <div class="difficulty">
+          <button
+            class="chip"
+            [class.active]="difficulty === 'easy'"
+            (click)="applyPreset('easy')"
+          >
+            Easy
+          </button>
+          <button
+            class="chip"
+            [class.active]="difficulty === 'normal'"
+            (click)="applyPreset('normal')"
+          >
+            Normal
+          </button>
+          <button
+            class="chip"
+            [class.active]="difficulty === 'hard'"
+            (click)="applyPreset('hard')"
+          >
+            Hard
+          </button>
+        </div>
+
+        <ul class="rules">
+          <li>
+            <span class="dot"></span>
+            <span class="text">
+              Snake starts at <strong>length {{ startingLength }}</strong> and
+              <strong>speed {{ startingSpeed }}</strong
+              >.
+            </span>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <span class="text">
+              <strong>Wrap Edges</strong> lets you exit one side and enter from
+              the opposite side.
+            </span>
+          </li>
+          <li>
+            <span class="dot"></span>
+            <span class="text">
+              Colliding with your tail (or walls if wrap OFF) ends the run.
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="play-right">
+        <h3>Options</h3>
+
+        <div class="options">
+          <label class="opt">
+            <span>Grid Size</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="12"
+                max="40"
+                step="1"
+                [(ngModel)]="gridSize"
+                aria-label="Grid size"
+              />
+              <span class="range-value">{{ gridSize }}×{{ gridSize }}</span>
+            </div>
+          </label>
+
+          <label class="opt">
+            <span>Starting Length</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="3"
+                max="8"
+                step="1"
+                [(ngModel)]="startingLength"
+                aria-label="Starting length"
+              />
+              <span class="range-value">{{ startingLength }}</span>
+            </div>
+          </label>
+
+          <label class="opt">
+            <span>Starting Speed</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                [(ngModel)]="startingSpeed"
+                aria-label="Starting speed"
+              />
+              <span class="range-value">{{ startingSpeed }}</span>
+            </div>
+          </label>
+
+          <label class="opt row">
+            <span>Wrap Edges</span>
+            <label class="switch small">
+              <input type="checkbox" [(ngModel)]="wrapEdges" />
+              <span class="slider"></span>
+            </label>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" (click)="onStart()">Start</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

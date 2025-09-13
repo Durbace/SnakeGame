@@ -1,0 +1,81 @@
+.speed-title{
+  margin: 4px 0 6px;
+  font-weight: 800;
+  font-size: clamp(24px, 4.2vw, 40px);
+  text-align: center;
+}
+.speed-lead{
+  margin: 0 0 18px;
+  text-align: center;
+  color: #475569;
+  font-size: 15px;
+}
+
+.speed-card{
+  background: #f3f4f6;
+  border: 1px solid #e5edf4;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.speed-grid{
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 780px){
+  .speed-grid{ grid-template-columns: 1fr; }
+}
+
+.speed-left h3{
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.speed-right{
+  background: #eef2f7;
+  border: 1px solid #e5edf4;
+  border-radius: 12px;
+  padding: 16px;
+  display: grid; place-items: center;
+}
+
+.speedometer{
+  display: grid; gap: 10px; place-items: center;
+}
+
+.dial{
+  position: relative;
+  width: 180px; height: 100px;
+  border-top-left-radius: 180px;
+  border-top-right-radius: 180px;
+  overflow: hidden;
+  background: radial-gradient(180px 100px at 50% 100%, #cbd5e1 50%, #e2e8f0 51%);
+  border: 1px solid #dbe3ea;
+}
+
+.tick{
+  position: absolute; width: 2px; height: 12px; background: #94a3b8; top: 12px; left: 50%;
+  transform-origin: 50% 88px; border-radius: 2px;
+}
+.t1{ transform: translateX(-1px) rotate(-50deg); }
+.t2{ transform: translateX(-1px) rotate(-20deg); }
+.t3{ transform: translateX(-1px) rotate(20deg);  }
+.t4{ transform: translateX(-1px) rotate(50deg);  }
+
+.needle{
+  position: absolute; left: 50%; bottom: 0;
+  width: 2px; height: 90px; background: #22c55e;
+  transform-origin: bottom center;
+  box-shadow: 0 0 0 3px #fff inset;
+  border-radius: 2px;
+}
+
+.legend{
+  width: 180px; display: flex; justify-content: space-between; font-size: 12px; color: #64748b;
+}
+
+.actions { margin-top: 12px; }

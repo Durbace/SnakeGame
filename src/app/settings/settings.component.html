@@ -1,0 +1,44 @@
+<section class="settings">
+  <h2 class="settings-title">Settings</h2>
+  <p class="settings-lead">Customize your game experience.</p>
+
+  <div class="settings-card">
+    <div class="row">
+      <div class="row-text">
+        <div class="row-title">Sound Effects</div>
+        <div class="row-desc">Enable or disable game sound effects.</div>
+      </div>
+
+      <label class="switch">
+        <input
+          type="checkbox"
+          [checked]="sfxEnabled"
+          (change)="onToggleSfx($event)"
+          aria-label="Toggle sound effects"
+        />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="row">
+      <div class="row-text">
+        <div class="row-title">Music Volume</div>
+        <div class="row-desc">Adjust the volume of the game music.</div>
+      </div>
+
+      <div class="range-wrap">
+        <input
+          class="range"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          [value]="musicVolume"
+          (input)="onChangeMusicVol($event)"
+          aria-label="Music volume"
+        />
+        <span class="range-value">{{ musicVolume }}</span>
+      </div>
+    </div>
+  </div>
+</section>

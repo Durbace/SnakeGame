@@ -1,0 +1,109 @@
+.challenge-title {
+  margin: 4px 0 6px;
+  font-weight: 800;
+  font-size: clamp(24px, 4.2vw, 40px);
+  text-align: center;
+}
+.challenge-lead {
+  margin: 0 0 18px;
+  text-align: center;
+  color: #475569;
+  font-size: 15px;
+}
+.challenge-card {
+  background: #f3f4f6;
+  border: 1px solid #e5edf4;
+  border-radius: 14px;
+  padding: 18px;
+}
+.challenge-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 780px) {
+  .challenge-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.challenge-left h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+.challenge-right {
+  background: #eef2f7;
+  border: 1px solid #e5edf4;
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 700;
+  font-size: 12px;
+}
+.badge svg {
+  width: 14px;
+  height: 14px;
+}
+.badge.green {
+  background: #ecfdf3;
+  border-color: rgba(22, 163, 74, 0.25);
+  color: #16a34a;
+}
+.badge.blue {
+  background: #eff6ff;
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #2563eb;
+}
+.mission-preview {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px;
+}
+.mission-preview .row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.mission-preview .row.small {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  font-weight: 700;
+  font-size: 12px;
+}
+.pill.ok {
+  background: #ecfdf3;
+  border-color: rgba(22, 163, 74, 0.25);
+  color: #16a34a;
+}
+.actions {
+  margin-top: 12px;
+}
