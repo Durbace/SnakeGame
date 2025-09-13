@@ -1,20 +1,21 @@
 <div class="homepage">
-  <img src="assets/tortoise-shell.svg" alt="Background" class="homepage-bg">
+  <img src="assets/tortoise-shell.svg" alt="Background" class="homepage-bg" />
 
   <section class="hero">
     <h1 class="logo">SNAKE</h1>
     <p class="tagline">Eat. Grow. Survive.</p>
 
     <div class="cta-row">
-      <!-- Play -->
       <button class="btn btn-primary" (click)="openModal('play')">Play</button>
     </div>
 
     <div class="cta-row secondary">
-      <!-- How to Play -->
-      <button class="btn btn-secondary" (click)="openModal('howto')">How to Play</button>
-      <!-- Settings -->
-      <button class="btn btn-secondary" (click)="openModal('settings')">Settings</button>
+      <button class="btn btn-secondary" (click)="openModal('howto')">
+        How to Play
+      </button>
+      <button class="btn btn-secondary" (click)="openModal('settings')">
+        Settings
+      </button>
     </div>
   </section>
 
@@ -25,8 +26,20 @@
       <article class="mode-card" (click)="openModal('classic')">
         <div class="icon">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M7 12h3m-1.5-1.5v3M16 12h.01m2 0h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M6 16l2-2h8l2 2c2 0 3-1.79 3-4s-1-4-3-4H6C4 8 3 9.79 3 12s1 4 3 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path
+              d="M7 12h3m-1.5-1.5v3M16 12h.01m2 0h.01"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+            <path
+              d="M6 16l2-2h8l2 2c2 0 3-1.79 3-4s-1-4-3-4H6C4 8 3 9.79 3 12s1 4 3 4z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linejoin="round"
+            />
           </svg>
         </div>
         <h3>Classic Snake</h3>
@@ -35,8 +48,21 @@
       <article class="mode-card" (click)="openModal('speed')">
         <div class="icon">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="13" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
-            <path d="M12 13V9m-3-6h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle
+              cx="12"
+              cy="13"
+              r="7"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <path
+              d="M12 13V9m-3-6h6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
           </svg>
         </div>
         <h3>Speed Challenge</h3>
@@ -45,7 +71,14 @@
       <article class="mode-card" (click)="openModal('endless')">
         <div class="icon">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M18 14c-2 0-4-4-6-4s-4 4-6 4a3 3 0 0 1 0-6c2 0 4 4 6 4s4-4 6-4a3 3 0 0 1 0 6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path
+              d="M18 14c-2 0-4-4-6-4s-4 4-6 4a3 3 0 0 1 0-6c2 0 4 4 6 4s4-4 6-4a3 3 0 0 1 0 6z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </div>
         <h3>Endless Mode</h3>
@@ -54,53 +87,196 @@
   </section>
 </div>
 
-<!-- MODAL -->
 <div
   class="modal-overlay"
   *ngIf="isModalOpen"
   (click)="onOverlayClick($event)"
   [class.open]="isModalOpen"
 >
-  <div class="modal" role="dialog" aria-modal="true" [attr.aria-labelledby]="modalTitleId" (click)="$event.stopPropagation()">
+  <div
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="modalTitleId"
+    (click)="$event.stopPropagation()"
+  >
     <div class="modal-header">
       <h3 [id]="modalTitleId">{{ modalTitle }}</h3>
-      <button class="modal-close" (click)="closeModal()" aria-label="Close">✕</button>
+      <button class="modal-close" (click)="closeModal()" aria-label="Close">
+        ✕
+      </button>
     </div>
 
     <div class="modal-body" [ngSwitch]="modalType">
       <ng-container *ngSwitchCase="'play'">
-        <!-- Conținut pentru Play -->
         <p>Ready to play? Choose your difficulty and press Start.</p>
         <div class="modal-actions">
           <button class="btn btn-primary" (click)="startGame()">Start</button>
-          <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+          <button class="btn btn-secondary" (click)="closeModal()">
+            Cancel
+          </button>
         </div>
       </ng-container>
 
       <ng-container *ngSwitchCase="'howto'">
-        <!-- Conținut pentru How to Play -->
-        <p>Use arrow keys or WASD to control the snake. Eat apples, avoid walls and yourself.</p>
+        <section class="howto">
+          <h2 class="howto-title">How to Play</h2>
+          <p class="howto-lead">
+            Welcome to the classic Snake game! Guide your slithery friend to eat
+            as much food as possible, but be careful not to run into walls or
+            your own ever-growing tail.
+          </p>
+
+          <div class="howto-grid">
+            <div class="howto-left">
+              <article class="howto-item">
+                <div class="howto-bullet" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M6 15l6-6 6 6"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3>Controls</h3>
+                  <p>
+                    Use the <span class="kbd">Arrow Keys</span> on your keyboard
+                    to change the snake’s direction.
+                  </p>
+                </div>
+              </article>
+
+              <article class="howto-item">
+                <div class="howto-bullet" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M8 21h8M12 17v4M6 4h12v2a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V4zM6 6H4a3 3 0 0 0 3 3M18 6h2a3 3 0 0 1-3 3"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3>Scoring</h3>
+                  <p>
+                    Each piece of food you eat earns you points. The more you
+                    eat, the higher your score!
+                  </p>
+                </div>
+              </article>
+
+              <article class="howto-item">
+                <div class="howto-bullet" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M4 12a8 8 0 1 1 16 0v3a2 2 0 0 1-2 2h-1v3H7v-3H6a2 2 0 0 1-2-2v-3z"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M9 12h0M15 12h0"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3>Game Over</h3>
+                  <p>
+                    The game ends if the snake collides with the walls or its
+                    own body. Watch out!
+                  </p>
+                </div>
+              </article>
+            </div>
+
+            <div class="howto-right" aria-hidden="true">
+              <div class="pad">
+                <button class="pad-btn up" tabindex="-1">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 6l-5 6h10l-5-6z" />
+                  </svg>
+                </button>
+
+                <button class="pad-btn left" tabindex="-1">
+                  <svg viewBox="0 0 24 24"><path d="M6 12l6 5V7l-6 5z" /></svg>
+                </button>
+
+                <span class="pad-dot"></span>
+
+                <button class="pad-btn right" tabindex="-1">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M18 12l-6-5v10l6-5z" />
+                  </svg>
+                </button>
+
+                <button class="pad-btn down" tabindex="-1">
+                  <svg viewBox="0 0 24 24"><path d="M12 18l5-6H7l5 6z" /></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
       </ng-container>
 
       <ng-container *ngSwitchCase="'settings'">
-        <!-- Conținut pentru Settings -->
-        <p>Settings will go here. (Sound, Speed, Theme, Controls…)</p>
-      </ng-container>
+        <section class="settings">
+          <h2 class="settings-title">Settings</h2>
+          <p class="settings-lead">Customize your game experience.</p>
 
-      <ng-container *ngSwitchCase="'classic'">
-        <p>Classic Snake rules. Pure nostalgia.</p>
-      </ng-container>
+          <div class="settings-card">
+            <div class="row">
+              <div class="row-text">
+                <div class="row-title">Sound Effects</div>
+                <div class="row-desc">
+                  Enable or disable game sound effects.
+                </div>
+              </div>
 
-      <ng-container *ngSwitchCase="'speed'">
-        <p>Speed ramps up quickly. Can you keep up?</p>
-      </ng-container>
+              <label class="switch">
+                <input
+                  type="checkbox"
+                  [checked]="sfxEnabled"
+                  (change)="toggleSfx($event)"
+                  aria-label="Toggle sound effects"
+                />
+                <span class="slider"></span>
+              </label>
+            </div>
 
-      <ng-container *ngSwitchCase="'endless'">
-        <p>Endless mode with progressive difficulty and bonuses.</p>
-      </ng-container>
+            <div class="row">
+              <div class="row-text">
+                <div class="row-title">Music Volume</div>
+                <div class="row-desc">Adjust the volume of the game music.</div>
+              </div>
 
-      <ng-container *ngSwitchDefault>
-        <p>Loading…</p>
+              <div class="range-wrap">
+                <input
+                  class="range"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  [value]="musicVolume"
+                  (input)="changeMusicVol($event)"
+                  aria-label="Music volume"
+                />
+                <span class="range-value">{{ musicVolume }}</span>
+              </div>
+            </div>
+          </div>
+        </section>
       </ng-container>
     </div>
   </div>
