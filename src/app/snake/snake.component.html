@@ -1,0 +1,12 @@
+<div id="container">
+  <h1>Snake Game</h1>
+  <canvas #screen id="screen"></canvas>
+  <h2>Score: {{ score }}</h2>
+
+  <div class="controls">
+    <button (click)="resetGame()">Restart</button>
+    <button (click)="togglePause()">{{ paused ? 'Resume' : 'Pause' }}</button>
+  </div>
+
+  <p class="hint">Use arrow keys. Don’t reverse into yourself 🙂</p>
+</div>

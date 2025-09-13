@@ -1,12 +1,11 @@
-<div id="container">
-  <h1>Snake Game</h1>
-  <canvas #screen id="screen"></canvas>
-  <h2>Score: {{ score }}</h2>
+<header class="shell">
+  <a routerLink="/" class="brand">🐍 Snake</a>
+  <nav>
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+    <a routerLink="/play" routerLinkActive="active">Play</a>
+  </nav>
+</header>
 
-  <div class="controls">
-    <button (click)="resetGame()">Restart</button>
-    <button (click)="togglePause()">{{ paused ? 'Resume' : 'Pause' }}</button>
-  </div>
-
-  <p class="hint">Use arrow keys. Don’t reverse into yourself 🙂</p>
-</div>
+<main class="content">
+  <router-outlet></router-outlet>
+</main>
