@@ -6,11 +6,15 @@
     <p class="tagline">Eat. Grow. Survive.</p>
 
     <div class="cta-row">
-      <a class="btn btn-primary" routerLink="/play">Play</a>
+      <!-- Play -->
+      <button class="btn btn-primary" (click)="openModal('play')">Play</button>
     </div>
+
     <div class="cta-row secondary">
-      <a class="btn btn-secondary" routerLink="/how-to-play">How to Play</a>
-      <a class="btn btn-secondary" routerLink="/settings">Settings</a>
+      <!-- How to Play -->
+      <button class="btn btn-secondary" (click)="openModal('howto')">How to Play</button>
+      <!-- Settings -->
+      <button class="btn btn-secondary" (click)="openModal('settings')">Settings</button>
     </div>
   </section>
 
@@ -18,9 +22,9 @@
     <h2>Game Modes</h2>
 
     <div class="mode-grid">
-      <article class="mode-card">
+      <article class="mode-card" (click)="openModal('classic')">
         <div class="icon">
-          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M7 12h3m-1.5-1.5v3M16 12h.01m2 0h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path d="M6 16l2-2h8l2 2c2 0 3-1.79 3-4s-1-4-3-4H6C4 8 3 9.79 3 12s1 4 3 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
           </svg>
@@ -28,9 +32,9 @@
         <h3>Classic Snake</h3>
       </article>
 
-      <article class="mode-card">
+      <article class="mode-card" (click)="openModal('speed')">
         <div class="icon">
-          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="13" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
             <path d="M12 13V9m-3-6h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
@@ -38,9 +42,9 @@
         <h3>Speed Challenge</h3>
       </article>
 
-      <article class="mode-card">
+      <article class="mode-card" (click)="openModal('endless')">
         <div class="icon">
-          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M18 14c-2 0-4-4-6-4s-4 4-6 4a3 3 0 0 1 0-6c2 0 4 4 6 4s4-4 6-4a3 3 0 0 1 0 6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
@@ -48,4 +52,56 @@
       </article>
     </div>
   </section>
+</div>
+
+<!-- MODAL -->
+<div
+  class="modal-overlay"
+  *ngIf="isModalOpen"
+  (click)="onOverlayClick($event)"
+  [class.open]="isModalOpen"
+>
+  <div class="modal" role="dialog" aria-modal="true" [attr.aria-labelledby]="modalTitleId" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 [id]="modalTitleId">{{ modalTitle }}</h3>
+      <button class="modal-close" (click)="closeModal()" aria-label="Close">✕</button>
+    </div>
+
+    <div class="modal-body" [ngSwitch]="modalType">
+      <ng-container *ngSwitchCase="'play'">
+        <!-- Conținut pentru Play -->
+        <p>Ready to play? Choose your difficulty and press Start.</p>
+        <div class="modal-actions">
+          <button class="btn btn-primary" (click)="startGame()">Start</button>
+          <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'howto'">
+        <!-- Conținut pentru How to Play -->
+        <p>Use arrow keys or WASD to control the snake. Eat apples, avoid walls and yourself.</p>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'settings'">
+        <!-- Conținut pentru Settings -->
+        <p>Settings will go here. (Sound, Speed, Theme, Controls…)</p>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'classic'">
+        <p>Classic Snake rules. Pure nostalgia.</p>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'speed'">
+        <p>Speed ramps up quickly. Can you keep up?</p>
+      </ng-container>
+
+      <ng-container *ngSwitchCase="'endless'">
+        <p>Endless mode with progressive difficulty and bonuses.</p>
+      </ng-container>
+
+      <ng-container *ngSwitchDefault>
+        <p>Loading…</p>
+      </ng-container>
+    </div>
+  </div>
 </div>

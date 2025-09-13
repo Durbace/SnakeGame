@@ -80,7 +80,8 @@
 }
 
 .btn-primary {
-  min-width: 300px;
+  min-width: 350px;
+  min-height: 70px;
   padding: 0 22px;
   background: #0b1220;
   color: #20f73c;
@@ -97,7 +98,8 @@
 }
 
 .btn-secondary {
-  min-width: 120px;
+  min-width: 170px;
+min-height: 70px;
   padding: 0 24px;
   background: #e9edf2;
   color: #0b1220;
@@ -179,3 +181,81 @@
   color: #0f172a;
   font-weight: 700;
 }
+
+/* ===== Modal + blur ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.28);        /* overlay semi-transparent */
+  backdrop-filter: blur(8px);           /* BLUR pe fundal */
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+  z-index: 50;                          /* peste tot */
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  width: min(560px, 92vw);
+  background: #ffffff;
+  border: 1px solid #e5edf4;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  overflow: hidden;
+  transform: translateY(10px);
+  animation: modalIn .18s ease forwards;
+}
+
+@keyframes modalIn {
+  to { transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.modal-close {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: #334155;
+}
+
+.modal-body {
+  padding: 16px;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.modal-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+/* Cursor pe carduri pentru a sugera click */
+.mode-card { cursor: pointer; }
+
+/* SVG-urile din icon să se scaleze corect */
+.mode-card .icon svg { width: 45px; height: 45px; }
