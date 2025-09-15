@@ -13,15 +13,13 @@
           <li>
             <span class="dot"></span>
             <span class="text">
-              Collect <strong>{{ targetFruits }}</strong
-              >&nbsp;fruits.
+              Collect <strong>{{ targetFruits }}</strong>&nbsp;fruits.
             </span>
           </li>
           <li>
             <span class="dot"></span>
             <span class="text">
-              Survive for <strong>{{ targetTime }}</strong
-              >&nbsp;seconds.
+              Survive for <strong>{{ targetTime }}</strong>&nbsp;seconds.
             </span>
           </li>
           <li>
@@ -33,104 +31,11 @@
             </span>
           </li>
         </ul>
-
-        <div class="options">
-          <label class="opt">
-            <span>Fruits to Collect</span>
-            <div class="range-wrap">
-              <input
-                class="range"
-                type="range"
-                min="5"
-                max="30"
-                step="1"
-                [(ngModel)]="targetFruits"
-                aria-label="Fruits target"
-              />
-              <span class="range-value">{{ targetFruits }}</span>
-            </div>
-          </label>
-
-          <label class="opt">
-            <span>Time Limit (sec)</span>
-            <div class="range-wrap">
-              <input
-                class="range"
-                type="range"
-                min="30"
-                max="180"
-                step="5"
-                [(ngModel)]="targetTime"
-                aria-label="Time limit"
-              />
-              <span class="range-value">{{ targetTime }}</span>
-            </div>
-          </label>
-
-          <label class="opt">
-            <span>Power-ups</span>
-            <label class="switch small">
-              <input type="checkbox" [(ngModel)]="powerUpsOn" />
-              <span class="slider"></span>
-            </label>
-          </label>
-
-          <label class="opt">
-            <span>Walls Allowed</span>
-            <label class="switch small">
-              <input type="checkbox" [(ngModel)]="wallsAllowed" />
-              <span class="slider"></span>
-            </label>
-          </label>
-        </div>
-
-        <div class="actions">
-          <button class="btn btn-primary" (click)="onStart()">Start</button>
-        </div>
       </div>
 
       <div class="challenge-right" aria-hidden="true">
-        <div class="badges">
-          <span class="badge">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M12 2l3 7h7l-5.6 4.1L18.8 22 12 17.6 5.2 22l2.4-8.9L2 9h7z"
-                fill="currentColor"
-              />
-            </svg>
-            Stars
-          </span>
-          <span class="badge green">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M12 3v18M3 12h18"
-                stroke="currentColor"
-                stroke-width="2"
-                fill="none"
-                stroke-linecap="round"
-              />
-            </svg>
-            Multipliers
-          </span>
-          <span class="badge blue" *ngIf="powerUpsOn">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 2l4 8-4 12-4-12 4-8z" fill="currentColor" />
-            </svg>
-            Power-ups
-          </span>
-        </div>
-
-        <div class="mission-preview">
-          <div class="row">
-            <span class="pill">Fruits: {{ targetFruits }}</span>
-            <span class="pill">Time: {{ targetTime }}s</span>
-            <span class="pill" [class.ok]="wallsAllowed"
-              >Walls {{ wallsAllowed ? "ON" : "OFF" }}</span
-            >
-          </div>
-          <div class="row small">
-            Finish fast for 3★ rating. Preview: {{ starHint }}
-          </div>
+        <div class="preview">
+          <img src="assets/challenge-preview.svg" alt="Challenge preview" />
         </div>
       </div>
     </div>

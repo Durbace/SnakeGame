@@ -82,6 +82,9 @@
   color: #20f73c;
   border: 2px solid #20f73c;
   box-shadow: 0 0 16px rgba(32, 247, 60, 0.7);
+
+  font-size: 28px; 
+  font-weight: 800;
 }
 .btn-primary:hover {
   background: #1d2943;
