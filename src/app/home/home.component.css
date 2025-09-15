@@ -99,6 +99,7 @@
   min-width: 170px;
   min-height: 70px;
   padding: 0 24px;
+  font-size: 16px;
   background: #e9edf2;
   color: #0b1220;
   border: 1px solid #dbe3ea;
@@ -244,3 +245,35 @@
   display: flex;
   gap: 8px;
 }
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #eef2f7;
+}
+
+.btn-next {
+  min-width: 120px;
+  min-height: 34px;
+  padding: 0 16px;
+  font-weight: 800;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-next .arrow {
+  display: inline-flex;
+  width: 22px; 
+  height: 22px;
+  transition: transform 0.2s ease;
+}
+
+.btn-next:hover .arrow {
+  transform: translateX(7px);
+}
+
+

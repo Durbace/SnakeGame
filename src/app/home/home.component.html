@@ -120,16 +120,34 @@
       </ng-container>
 
       <ng-container *ngSwitchCase="'classic'">
-        <app-classic-mode></app-classic-mode>
+        <app-classic-mode #classicCmp></app-classic-mode>
       </ng-container>
 
       <ng-container *ngSwitchCase="'speed'">
-        <app-speed-mode></app-speed-mode>
+        <app-speed-mode #speedCmp></app-speed-mode>
       </ng-container>
 
       <ng-container *ngSwitchCase="'challenge'">
-        <app-challenge-mode></app-challenge-mode>
+        <app-challenge-mode #challengeCmp></app-challenge-mode>
       </ng-container>
+    </div>
+
+    <div class="modal-footer" *ngIf="showsNext">
+      <button class="btn btn-primary btn-next" (click)="onNextClick()">
+        Next
+        <span class="arrow">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M5 12h14M13 6l6 6-6 6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+      </button>
     </div>
   </div>
 </div>
