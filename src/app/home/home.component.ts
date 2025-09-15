@@ -106,13 +106,21 @@ export class HomeComponent {
       case 'challenge':
         ref = this.challengeRef;
         break;
-      default:
+      default:  
         ref = null;
     }
     return isNextAware(ref) ? ref : null;
   }
 
   onNextClick() {
-    this.getActiveNextAware()?.onNext();
+    if (this.modalType === 'classic' && this.classicRef) {
+      if (this.classicRef.isInSettings) {
+        this.classicRef.onStartClassic();
+      } else {
+        this.classicRef.onNext();
+      }
+    } else {
+      this.getActiveNextAware()?.onNext();
+    }
   }
 }

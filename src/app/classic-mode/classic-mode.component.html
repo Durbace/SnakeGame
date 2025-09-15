@@ -1,4 +1,5 @@
-<section class="classic">
+<!-- Intro (Rules + Preview) -->
+<section class="classic" *ngIf="!showSettings">
   <h2 class="classic-title">Classic Mode</h2>
   <p class="classic-lead">
     Pure nostalgia: eat apples, grow longer, don’t hit the walls or yourself.
@@ -15,14 +16,12 @@
               Eat the fruit to gain <strong>+1</strong>&nbsp;length &amp; score.
             </span>
           </li>
-
           <li>
             <span class="dot"></span>
             <span class="text">
               Colliding with a wall or your tail ends the run.
             </span>
           </li>
-
           <li>
             <span class="dot"></span>
             <span class="text">
@@ -40,6 +39,95 @@
             <span class="cell snake"></span>
             <span class="cell snake head"></span>
             <span class="cell fruit"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Settings (înlocuiește complet conținutul) -->
+<section class="classic" *ngIf="showSettings">
+  <h2 class="classic-title">Classic Settings</h2>
+  <p class="classic-lead">Tune the arena and starting conditions.</p>
+
+  <div class="classic-card">
+    <div class="classic-grid">
+      <div class="classic-left">
+        <h3>Settings</h3>
+
+        <div class="options">
+          <label class="opt">
+            <span>Grid Size</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="10"
+                max="40"
+                step="2"
+                [(ngModel)]="gridSize"
+                aria-label="Grid size"
+              />
+              <span class="range-value">{{ gridSize }}×{{ gridSize }}</span>
+            </div>
+          </label>
+
+          <label class="opt">
+            <span>Starting Length</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                [(ngModel)]="startingLength"
+                aria-label="Starting length"
+              />
+              <span class="range-value">{{ startingLength }}</span>
+            </div>
+          </label>
+
+          <label class="opt">
+            <span>Starting Speed</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                [(ngModel)]="startingSpeed"
+                aria-label="Starting speed"
+              />
+              <span class="range-value">{{ startingSpeed }}</span>
+            </div>
+          </label>
+
+          <label class="opt row">
+            <span>Wrap Edges</span>
+            <label class="switch small">
+              <input
+                type="checkbox"
+                [(ngModel)]="wrapEdges"
+                aria-label="Wrap edges"
+              />
+              <span class="slider"></span>
+            </label>
+          </label>
+        </div>
+      </div>
+
+      <div class="classic-right" aria-hidden="true">
+        <div class="preview settings-preview">
+          <div class="grid">
+            <span class="cell snake"></span>
+            <span class="cell snake head"></span>
+            <span class="cell fruit"></span>
+          </div>
+          <div class="hint">
+            Grid: {{ gridSize }} • Speed: {{ startingSpeed }}
           </div>
         </div>
       </div>

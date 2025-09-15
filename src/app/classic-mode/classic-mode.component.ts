@@ -1,18 +1,39 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-classic-mode',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './classic-mode.component.html',
   styleUrls: ['./classic-mode.component.css'],
+    encapsulation: ViewEncapsulation.ShadowDom,
 })
 export class ClassicModeComponent {
-  @Output() next = new EventEmitter<void>();
+  showSettings = false;
+
+  gridSize = 24;
+  wrapEdges = false;
+  startingLength = 4;
+  startingSpeed = 5;
 
   onNext() {
-    // toată logica ta rămâne aici
-    console.log('[Classic] Next pressed');
+    this.showSettings = true;
+  }
+
+  onStartClassic() {
+    console.log('[Classic] Start with:', {
+      gridSize: this.gridSize,
+      wrapEdges: this.wrapEdges,
+      startingLength: this.startingLength,
+      startingSpeed: this.startingSpeed,
+    });
+    // aici trimiți eveniment sau pornești engine-ul
+  }
+
+  /** pentru părinte */
+  get isInSettings(): boolean {
+    return this.showSettings;
   }
 }

@@ -134,8 +134,8 @@
 
     <div class="modal-footer" *ngIf="showsNext">
       <button class="btn btn-primary btn-next" (click)="onNextClick()">
-        Next
-        <span class="arrow">
+        {{ classicRef?.isInSettings ? "Start" : "Next" }}
+        <span class="arrow" *ngIf="!classicRef?.isInSettings">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
               d="M5 12h14M13 6l6 6-6 6"
