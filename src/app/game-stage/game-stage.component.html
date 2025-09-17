@@ -1,5 +1,4 @@
 <div class="game-root">
-  <!-- Top bar -->
   <header class="topbar">
     <div class="brand" (click)="home.emit()">
       <span class="logo"></span>
@@ -16,32 +15,31 @@
       </button>
       <button class="btn pause" (click)="pauseToggle.emit()">
         <span class="ico-pause" aria-hidden="true"></span>
-        {{ paused ? 'Resume' : 'Pause' }}
+        {{ paused ? "Resume" : "Pause" }}
       </button>
     </nav>
   </header>
 
-  <!-- Score bar -->
-  <section class="scorebar">
-    <div class="score-left">
-      <div class="label">Score</div>
-      <div class="value">{{ score }}</div>
-    </div>
-    <div class="score-right">
-      <div class="label">High Score</div>
-      <div class="value">{{ highScore }}</div>
-    </div>
-  </section>
-
-  <!-- Playfield (put canvas/content via ng-content) -->
   <main class="play-wrap">
-    <div class="playfield">
-      <ng-content></ng-content>
-      <!-- Exemple: <canvas width="640" height="640"></canvas> -->
+    <div class="play-layout">
+      <aside class="score-side left">
+        <div class="label">Score</div>
+        <div class="value">{{ score }}</div>
+      </aside>
+
+      <app-game-classic
+        [mode]="mode"
+        [classicSettings]="mode === 'classic' ? settings : null"
+      >
+      </app-game-classic>
+
+      <aside class="score-side right">
+        <div class="label">High<br />Score</div>
+        <div class="value">{{ highScore }}</div>
+      </aside>
     </div>
   </main>
 
-  <!-- Bottom status -->
   <footer class="bottombar">
     <div class="left">
       <span class="muted">Difficulty:</span>
@@ -50,7 +48,7 @@
     <div class="right">
       <span class="ico-speed" aria-hidden="true"></span>
       <span class="muted">Game Speed:</span>
-      <strong>{{ gameSpeed | number:'1.0-1' }}x</strong>
+      <strong>{{ gameSpeed | number : "1.0-1" }}x</strong>
     </div>
   </footer>
 </div>

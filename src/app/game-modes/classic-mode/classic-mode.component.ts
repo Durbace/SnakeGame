@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   templateUrl: './classic-mode.component.html',
   styleUrls: ['./classic-mode.component.css'],
-    encapsulation: ViewEncapsulation.ShadowDom,
+  encapsulation: ViewEncapsulation.ShadowDom,
 })
 export class ClassicModeComponent {
   showSettings = false;
@@ -29,10 +29,8 @@ export class ClassicModeComponent {
       startingLength: this.startingLength,
       startingSpeed: this.startingSpeed,
     });
-    // aici trimiți eveniment sau pornești engine-ul
   }
 
-  /** pentru părinte */
   get isInSettings(): boolean {
     return this.showSettings;
   }

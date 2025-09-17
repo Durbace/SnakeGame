@@ -1,8 +1,8 @@
-<!-- Intro (Rules + Speedometer) -->
 <section class="speed" *ngIf="!showSettings">
   <h2 class="speed-title">Speed Challenge</h2>
   <p class="speed-lead">
-    The pace ramps up fast. React quickly, keep control, and chase the highest score.
+    The pace ramps up fast. React quickly, keep control, and chase the highest
+    score.
   </p>
 
   <div class="speed-card">
@@ -50,7 +50,6 @@
   </div>
 </section>
 
-<!-- Settings -->
 <section class="speed" *ngIf="showSettings">
   <h2 class="speed-title">Speed Settings</h2>
   <p class="speed-lead">Fine-tune your pace and constraints.</p>
@@ -67,7 +66,9 @@
               <input
                 class="range"
                 type="range"
-                min="1" max="10" step="1"
+                min="1"
+                max="10"
+                step="1"
                 [(ngModel)]="speedStart"
                 aria-label="Starting speed"
               />
@@ -81,7 +82,9 @@
               <input
                 class="range"
                 type="range"
-                min="0" max="3" step="0.1"
+                min="0"
+                max="3"
+                step="0.1"
                 [(ngModel)]="accelRate"
                 aria-label="Acceleration"
               />
@@ -95,7 +98,9 @@
               <input
                 class="range"
                 type="range"
-                min="30" max="300" step="10"
+                min="30"
+                max="300"
+                step="10"
                 [(ngModel)]="timeAttack"
                 aria-label="Time attack duration"
               />
@@ -106,7 +111,11 @@
           <label class="opt row">
             <span>Obstacles</span>
             <label class="switch small">
-              <input type="checkbox" [(ngModel)]="obstaclesOn" aria-label="Obstacles on" />
+              <input
+                type="checkbox"
+                [(ngModel)]="obstaclesOn"
+                aria-label="Obstacles on"
+              />
               <span class="slider"></span>
             </label>
           </label>

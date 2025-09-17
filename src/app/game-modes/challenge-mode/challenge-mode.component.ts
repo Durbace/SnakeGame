@@ -29,7 +29,6 @@ export class ChallengeModeComponent {
       powerUpsOn: this.powerUpsOn,
       wallsAllowed: this.wallsAllowed,
     });
-    // aici poți trimite event sau porni engine-ul Challenge
   }
 
   get isInSettings(): boolean {

@@ -4,9 +4,9 @@ import { Router } from '@angular/router';
 
 import { SettingsComponent } from '../settings/settings.component';
 import { HowToPlayComponent } from '../how-to-play/how-to-play.component';
-import { ClassicModeComponent } from '../classic-mode/classic-mode.component';
-import { SpeedModeComponent } from '../speed-mode/speed-mode.component';
-import { ChallengeModeComponent } from '../challenge-mode/challenge-mode.component';
+import { ClassicModeComponent } from '../game-modes/classic-mode/classic-mode.component';
+import { SpeedModeComponent } from '../game-modes/speed-mode/speed-mode.component';
+import { ChallengeModeComponent } from '../game-modes/challenge-mode/challenge-mode.component';
 import { PlayStartComponent } from '../play-start/play-start.component';
 
 type ModalType =
@@ -57,9 +57,9 @@ export class HomeComponent {
 
   constructor(private router: Router) {}
 
-   private goToPlay(mode: 'classic' | 'speed' | 'challenge') {
+  private goToPlay(mode: 'classic' | 'speed' | 'challenge', settings?: any) {
     this.closeModal();
-    this.router.navigate(['/play'], { queryParams: { mode } });
+    this.router.navigate(['/play'], { state: { mode, settings } });
   }
 
   get modalTitle(): string {
@@ -120,22 +120,23 @@ export class HomeComponent {
     return isNextAware(ref) ? ref : null;
   }
 
-   onNextClick() {
-    // Classic
+  onNextClick() {
     if (this.modalType === 'classic' && this.classicRef) {
       if (this.classicRef.isInSettings) {
-        // era: this.classicRef.onStartClassic();
-        this.goToPlay('classic');
+        this.goToPlay('classic', {
+          gridSize: this.classicRef.gridSize,
+          wrapEdges: this.classicRef.wrapEdges,
+          startingLength: this.classicRef.startingLength,
+          startingSpeed: this.classicRef.startingSpeed,
+        });
       } else {
         this.classicRef.onNext();
       }
       return;
     }
 
-    // Speed
     if (this.modalType === 'speed' && this.speedRef) {
       if (this.speedRef.isInSettings) {
-        // era: this.speedRef.onStartSpeed();
         this.goToPlay('speed');
       } else {
         this.speedRef.onNext();
@@ -143,10 +144,8 @@ export class HomeComponent {
       return;
     }
 
-    // Challenge
     if (this.modalType === 'challenge' && this.challengeRef) {
       if (this.challengeRef.isInSettings) {
-        // era: this.challengeRef.onStartChallenge();
         this.goToPlay('challenge');
       } else {
         this.challengeRef.onNext();
@@ -154,7 +153,6 @@ export class HomeComponent {
       return;
     }
 
-    // fallback (nu ar trebui să se ajungă aici în mod normal)
     this.getActiveNextAware()?.onNext();
   }
 }

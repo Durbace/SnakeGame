@@ -1,4 +1,3 @@
-<!-- Intro (Rules + Preview) -->
 <section class="classic" *ngIf="!showSettings">
   <h2 class="classic-title">Classic Mode</h2>
   <p class="classic-lead">
@@ -46,10 +45,9 @@
   </div>
 </section>
 
-<!-- Settings (înlocuiește complet conținutul) -->
 <section class="classic" *ngIf="showSettings">
   <h2 class="classic-title">Classic Settings</h2>
-  <p class="classic-lead">Tune the arena and starting conditions.</p>
+  <p class="classic-lead">Height is fixed to 26 rows. Adjust width (columns).</p>
 
   <div class="classic-card">
     <div class="classic-grid">
@@ -58,18 +56,18 @@
 
         <div class="options">
           <label class="opt">
-            <span>Grid Size</span>
+            <span>Columns (width)</span>
             <div class="range-wrap">
               <input
                 class="range"
                 type="range"
                 min="10"
-                max="40"
-                step="2"
+                max="60"
+                step="1"
                 [(ngModel)]="gridSize"
-                aria-label="Grid size"
+                aria-label="Columns (width)"
               />
-              <span class="range-value">{{ gridSize }}×{{ gridSize }}</span>
+              <span class="range-value">{{ gridSize }} × 26</span>
             </div>
           </label>
 
@@ -127,7 +125,7 @@
             <span class="cell fruit"></span>
           </div>
           <div class="hint">
-            Grid: {{ gridSize }} • Speed: {{ startingSpeed }}
+            Grid: {{ gridSize }}×26 • Speed: {{ startingSpeed }}
           </div>
         </div>
       </div>
