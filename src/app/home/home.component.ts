@@ -106,7 +106,7 @@ export class HomeComponent {
       case 'challenge':
         ref = this.challengeRef;
         break;
-      default:  
+      default:
         ref = null;
     }
     return isNextAware(ref) ? ref : null;
@@ -119,8 +119,27 @@ export class HomeComponent {
       } else {
         this.classicRef.onNext();
       }
-    } else {
-      this.getActiveNextAware()?.onNext();
+      return;
     }
+
+    if (this.modalType === 'speed' && this.speedRef) {
+      if (this.speedRef.isInSettings) {
+        this.speedRef.onStartSpeed();
+      } else {
+        this.speedRef.onNext();
+      }
+      return;
+    }
+
+    if (this.modalType === 'challenge' && this.challengeRef) {
+      if (this.challengeRef.isInSettings) {
+        this.challengeRef.onStartChallenge();
+      } else {
+        this.challengeRef.onNext();
+      }
+      return;
+    }
+
+    this.getActiveNextAware()?.onNext();
   }
 }
