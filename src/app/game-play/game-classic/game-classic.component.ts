@@ -2,10 +2,11 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
-  HostListener,
   Input,
   OnChanges,
   OnDestroy,
+  Output,
+  EventEmitter,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
@@ -13,7 +14,7 @@ import {
 type Cell = { x: number; y: number };
 
 export interface ClassicSettings {
-  gridSize: number; 
+  gridSize: number;
   wrapEdges: boolean;
   startingLength: number;
   startingSpeed: number;
@@ -24,22 +25,31 @@ export interface ClassicSettings {
   standalone: true,
   imports: [],
   templateUrl: './game-classic.component.html',
-  styleUrl: './game-classic.component.css'
+  styleUrls: ['./game-classic.component.css'],
 })
 export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() mode: 'classic' | 'speed' | 'challenge' | null = null;
   @Input() classicSettings: ClassicSettings | null = null;
 
+  @Input() paused = false;
+  @Input() gameSpeed = 1;
+
+  @Output() scoreChange = new EventEmitter<number>();
+  @Output() highScoreChange = new EventEmitter<number>();
+  @Output() speedChange = new EventEmitter<number>();
+  @Output() gameOver = new EventEmitter<void>();
+  @Output() requestRestart = new EventEmitter<void>(); 
+  @Output() resumeRequested = new EventEmitter<void>();
+
   @ViewChild('screen', { static: false })
   canvasRef!: ElementRef<HTMLCanvasElement>;
 
   score = 0;
+  private highScore = 0;
 
   readonly cellSize = 20;
-
   readonly fixedRows = 26;
   rows = this.fixedRows;
-
   cols = 20;
 
   tickMs = 120;
@@ -54,30 +64,68 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
   private vx = 1;
   private vy = 0;
   private food!: Cell;
-  private gameOver = false;
-  paused = false;
+  private over = false;
 
   private snakeInitLen = 5;
 
-  ngOnChanges(_: SimpleChanges): void {
-    if (this.classicSettings) {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['classicSettings'] && this.classicSettings) {
       this.applyClassicSettings(this.classicSettings);
-      if (this.viewInited) {  
+      if (this.viewInited) {
         this.setupCanvas();
         this.resetGame();
       }
+    }
+    if (changes['paused'] && this.viewInited) {
+      this.setPaused(this.paused);
+    }
+    if (changes['gameSpeed'] && !changes['gameSpeed'].firstChange) {
+      this.recomputeTickFromGameSpeed();
+      this.restartInterval();
+      this.speedChange.emit(this.gameSpeed);
     }
   }
 
   ngAfterViewInit(): void {
     this.viewInited = true;
     if (this.classicSettings) this.applyClassicSettings(this.classicSettings);
+
+    this.recomputeTickFromGameSpeed();
+
     this.setupCanvas();
     this.resetGame();
   }
 
   ngOnDestroy(): void {
     window.clearInterval(this.intervalId);
+  }
+
+  public setPaused(p: boolean): void {
+  this.paused = p;
+  if (this.paused && !this.over) {
+    this.drawAll();
+    this.drawPauseOverlay();
+  }
+  if (!this.paused && !this.over) {
+    this.drawAll();
+  }
+}
+
+  public restart(): void {
+    this.resetGame();
+  }
+
+  public handleKey(key: string): void {
+    const k = key;
+    const goingUp = this.vy === -1;
+    const goingDown = this.vy === 1;
+    const goingRight = this.vx === 1;
+    const goingLeft = this.vx === -1;
+
+    if ((k === 'ArrowLeft' || k.toLowerCase() === 'a') && !goingRight)      { this.vx = -1; this.vy = 0; }
+    else if ((k === 'ArrowUp' || k.toLowerCase() === 'w') && !goingDown)    { this.vx = 0;  this.vy = -1; }
+    else if ((k === 'ArrowRight' || k.toLowerCase() === 'd') && !goingLeft) { this.vx = 1;  this.vy = 0; }
+    else if ((k === 'ArrowDown' || k.toLowerCase() === 's') && !goingUp)    { this.vx = 0;  this.vy = 1; }
   }
 
   private applyClassicSettings(s: ClassicSettings) {
@@ -97,10 +145,16 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
     this.snakeInitLen = Math.min(50, Math.max(1, Math.floor(s.startingLength)));
   }
 
+  private recomputeTickFromGameSpeed() {
+    const base = this.tickMs || 120;
+    const factor = Math.max(0.2, Number(this.gameSpeed) || 1);
+    this.tickMs = Math.max(20, Math.floor(base / factor));
+  }
+
   private setupCanvas() {
     const canvas = this.canvasRef.nativeElement;
-    const cssW = this.cols * this.cellSize;  
-    const cssH = this.fixedRows * this.cellSize; 
+    const cssW = this.cols * this.cellSize;
+    const cssH = this.fixedRows * this.cellSize;
 
     canvas.width = cssW * this.deviceScale;
     canvas.height = cssH * this.deviceScale;
@@ -115,7 +169,7 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
     this.ctx.setTransform(this.deviceScale, 0, 0, this.deviceScale, 0, 0);
   }
 
-  resetGame() {
+  private resetGame() {
     window.clearInterval(this.intervalId);
 
     const midY = Math.floor(this.rows / 2);
@@ -127,36 +181,27 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
     this.vx = 1;
     this.vy = 0;
     this.score = 0;
-    this.gameOver = false;
-    this.paused = false;
+    this.over = false;
 
     this.spawnFood();
     this.drawAll();
 
+    this.restartInterval();
+
+    this.scoreChange.emit(this.score);
+    this.highScoreChange.emit(this.highScore);
+    this.speedChange.emit(this.gameSpeed);
+  }
+
+  private restartInterval() {
+    window.clearInterval(this.intervalId);
     this.intervalId = window.setInterval(() => {
-      if (!this.gameOver && !this.paused) this.tick();
+      if (!this.over && !this.paused) this.tick();
     }, this.tickMs);
   }
 
-  togglePause() { this.paused = !this.paused; }
-
-  @HostListener('window:keydown', ['$event'])
-  onKeydown(e: KeyboardEvent) {
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
-
-    const goingUp = this.vy === -1;
-    const goingDown = this.vy === 1;
-    const goingRight = this.vx === 1;
-    const goingLeft = this.vx === -1;
-
-    if (e.key === 'ArrowLeft' && !goingRight)      { this.vx = -1; this.vy = 0; }
-    else if (e.key === 'ArrowUp' && !goingDown)    { this.vx = 0;  this.vy = -1; }
-    else if (e.key === 'ArrowRight' && !goingLeft) { this.vx = 1;  this.vy = 0; }
-    else if (e.key === 'ArrowDown' && !goingUp)    { this.vx = 0;  this.vy = 1; }
-  }
-
   private tick() {
-    let head = { x: this.snake[0].x + this.vx, y: this.snake[0].y + this.vy };
+    const head = { x: this.snake[0].x + this.vx, y: this.snake[0].y + this.vy };
 
     if (this.wrapEdges) {
       if (head.x < 0) head.x = this.cols - 1;
@@ -169,6 +214,11 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
 
     if (head.x === this.food.x && head.y === this.food.y) {
       this.score++;
+      this.scoreChange.emit(this.score);
+      if (this.score > this.highScore) {
+        this.highScore = this.score;
+        this.highScoreChange.emit(this.highScore);
+      }
       this.spawnFood();
     } else {
       this.snake.pop();
@@ -176,19 +226,19 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
 
     if (!this.wrapEdges &&
         (head.x < 0 || head.x >= this.cols || head.y < 0 || head.y >= this.rows)) {
-      this.endGame(); return;
+      this.finishGame(); return;
     }
 
     for (let i = 1; i < this.snake.length; i++) {
       const p = this.snake[i];
-      if (p.x === head.x && p.y === head.y) { this.endGame(); return; }
+      if (p.x === head.x && p.y === head.y) { this.finishGame(); return; }
     }
 
     this.drawAll();
   }
 
-  private endGame() {
-    this.gameOver = true;
+  private finishGame() {
+    this.over = true;
     window.clearInterval(this.intervalId);
     this.drawAll();
 
@@ -203,7 +253,9 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
     this.ctx.textAlign = 'center';
     this.ctx.fillText('Game Over', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2);
     this.ctx.font = '14px monospace';
-    this.ctx.fillText('Press Restart', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2 + 28);
+    this.ctx.fillText('Click to Restart', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2 + 28);
+
+    this.gameOver.emit();
   }
 
   private spawnFood() {
@@ -227,4 +279,32 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
       this.ctx.fillRect(part.x * this.cellSize, part.y * this.cellSize, this.cellSize, this.cellSize);
     }
   }
+
+  public onCanvasClick(): void {
+  if (this.over) {
+    this.requestRestart.emit();
+    return;
+  }
+  if (this.paused) {
+    this.resumeRequested.emit();
+  }
+}
+private drawPauseOverlay() {
+  this.ctx.save();
+  this.ctx.globalAlpha = 0.7;
+  this.ctx.fillStyle = '#000';
+  this.ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
+  this.ctx.restore();
+
+  this.ctx.fillStyle = '#fff';
+  this.ctx.textAlign = 'center';
+  this.ctx.font = 'bold 24px monospace';
+  this.ctx.fillText('Paused', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2);
+  this.ctx.font = '14px monospace';
+  this.ctx.fillText(
+    'Click to resume',
+    (this.cols * this.cellSize) / 2,
+    (this.rows * this.cellSize) / 2 + 28
+  );
+}
 }

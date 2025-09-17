@@ -1,20 +1,23 @@
-<div class="game-root">
+<div class="game-root" [class.blurred]="showHowTo">
   <header class="topbar">
-    <div class="brand" (click)="home.emit()">
+    <div class="brand" (click)="onClickHome()">
       <span class="logo"></span>
       <span class="brand-text">{{ title }}</span>
     </div>
 
     <nav class="nav">
-      <button class="link" (click)="home.emit()">Home</button>
-      <button class="link" (click)="howTo.emit()">How to Play</button>
+      <button class="link" (click)="onClickHome()">Home</button>
+      <button class="link" (click)="onClickHowTo()">How to Play</button>
       <span class="sep" aria-hidden="true">|</span>
-      <button class="btn restart" (click)="restart.emit()">
+      <button class="btn restart" (click)="onClickRestart()">
         <span class="ico-refresh" aria-hidden="true"></span>
         Restart
       </button>
-      <button class="btn pause" (click)="pauseToggle.emit()">
-        <span class="ico-pause" aria-hidden="true"></span>
+      <button
+        class="btn pause"
+        (click)="onClickPauseToggle()"
+        [attr.aria-label]="paused ? 'Resume' : 'Pause'">
+        <span [ngClass]="paused ? 'ico-play' : 'ico-pause'" aria-hidden="true"></span>
         {{ paused ? "Resume" : "Pause" }}
       </button>
     </nav>
@@ -28,10 +31,18 @@
       </aside>
 
       <app-game-classic
-        [mode]="mode"
-        [classicSettings]="mode === 'classic' ? settings : null"
-      >
-      </app-game-classic>
+  [mode]="mode"
+  [paused]="paused"
+  [gameSpeed]="gameSpeed"
+  [classicSettings]="mode === 'classic' ? settings : null"
+  (scoreChange)="handleScoreChange($event)"
+  (highScoreChange)="handleHighScoreChange($event)"
+  (speedChange)="handleSpeedChange($event)"
+  (gameOver)="handleGameOver()"
+  (requestRestart)="handleRequestedRestart()"
+  (resumeRequested)="handleResumeRequested()" 
+></app-game-classic>
+
 
       <aside class="score-side right">
         <div class="label">High<br />Score</div>
@@ -51,4 +62,17 @@
       <strong>{{ gameSpeed | number : "1.0-1" }}x</strong>
     </div>
   </footer>
+</div>
+
+<div *ngIf="showHowTo" class="modal-wrap" role="dialog" aria-modal="true">
+  <div class="modal-backdrop" (click)="closeHowTo()"></div>
+  <div class="modal-panel" tabindex="-1">
+    <header class="modal-header">
+      <h3>How to Play</h3>
+      <button class="modal-close" (click)="closeHowTo()" aria-label="Close">×</button>
+    </header>
+    <div class="modal-body">
+      <app-how-to-play></app-how-to-play>
+    </div>
+  </div>
 </div>

@@ -1,6 +1,14 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
+export interface ClassicSettings {
+  gridSize: number;
+  wrapEdges: boolean;
+  startingLength: number;
+  startingSpeed: number;
+}
 
 @Component({
   selector: 'app-classic-mode',
@@ -18,16 +26,25 @@ export class ClassicModeComponent {
   startingLength = 4;
   startingSpeed = 5;
 
+  constructor(private router: Router) {}
+
   onNext() {
     this.showSettings = true;
   }
 
   onStartClassic() {
-    console.log('[Classic] Start with:', {
+    const settings: ClassicSettings = {
       gridSize: this.gridSize,
       wrapEdges: this.wrapEdges,
       startingLength: this.startingLength,
       startingSpeed: this.startingSpeed,
+    };
+
+    this.router.navigateByUrl('/play', {
+      state: {
+        mode: 'classic',
+        settings,
+      },
     });
   }
 
