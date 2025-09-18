@@ -28,21 +28,47 @@
       <aside class="score-side left">
         <div class="label">Score</div>
         <div class="value">{{ score }}</div>
+
+        <ng-container *ngIf="mode === 'speed'">
+          <div class="label small">Time</div>
+          <div class="value small">{{ timeLeft }}s</div>
+
+          <div class="label small">Speed</div>
+          <div class="value small">{{ gameSpeed | number : '1.2-2' }}x</div>
+        </ng-container>
       </aside>
 
       <app-game-classic
-  [mode]="mode"
-  [paused]="paused"
-  [gameSpeed]="gameSpeed"
-  [classicSettings]="mode === 'classic' ? settings : null"
-  (scoreChange)="handleScoreChange($event)"
-  (highScoreChange)="handleHighScoreChange($event)"
-  (speedChange)="handleSpeedChange($event)"
-  (gameOver)="handleGameOver()"
-  (requestRestart)="handleRequestedRestart()"
-  (resumeRequested)="handleResumeRequested()" 
-></app-game-classic>
+        *ngIf="mode === 'classic'"
+        [mode]="mode"
+        [paused]="paused"
+        [gameSpeed]="gameSpeed"
+        [classicSettings]="mode === 'classic' ? settings : null"
+        (scoreChange)="handleScoreChange($event)"
+        (highScoreChange)="handleHighScoreChange($event)"
+        (speedChange)="handleSpeedChange($event)"
+        (gameOver)="handleGameOver()"
+        (requestRestart)="handleRequestedRestart()"
+        (resumeRequested)="handleResumeRequested()"
+      ></app-game-classic>
 
+      <app-game-speed
+        *ngIf="mode === 'speed'"
+        [mode]="mode"
+        [paused]="paused"
+        [gameSpeed]="gameSpeed"
+        [speedSettings]="speedSettings"
+        (timeLeftChange)="handleTimeLeftChange($event)"
+        (scoreChange)="handleScoreChange($event)"
+        (highScoreChange)="handleHighScoreChange($event)"
+        (speedChange)="handleSpeedChange($event)"
+        (gameOver)="handleGameOver()"
+        (requestRestart)="handleRequestedRestart()"
+        (resumeRequested)="handleResumeRequested()"
+      ></app-game-speed>
+
+      <!-- (opțional) CHALLENGE păstrat pentru viitor -->
+      <!-- <app-game-challenge *ngIf="mode==='challenge'">...</app-game-challenge> -->
 
       <aside class="score-side right">
         <div class="label">High<br />Score</div>
@@ -53,13 +79,22 @@
 
   <footer class="bottombar">
     <div class="left">
-      <span class="muted">Difficulty:</span>
-      <span class="pill">{{ difficulty }}</span>
+      <span class="muted">Mode:</span>
+      <span class="pill">{{ mode || '—' }}</span>
+      <span class="muted" *ngIf="mode==='classic'">&nbsp;•&nbsp;Difficulty:</span>
+      <span class="pill" *ngIf="mode==='classic'">{{ difficulty }}</span>
+      <span class="muted" *ngIf="mode==='speed'">&nbsp;•&nbsp;Obstacles:</span>
+      <span class="pill" *ngIf="mode==='speed'">{{ speedSettings.obstaclesOn ? 'On' : 'Off' }}</span>
     </div>
     <div class="right">
       <span class="ico-speed" aria-hidden="true"></span>
       <span class="muted">Game Speed:</span>
       <strong>{{ gameSpeed | number : "1.0-1" }}x</strong>
+      <ng-container *ngIf="mode==='speed'">
+        <span class="sep" aria-hidden="true">&nbsp;|&nbsp;</span>
+        <span class="muted">Time Left:</span>
+        <strong>{{ timeLeft }}s</strong>
+      </ng-container>
     </div>
   </footer>
 </div>
