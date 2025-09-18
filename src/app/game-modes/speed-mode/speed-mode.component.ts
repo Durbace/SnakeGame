@@ -1,6 +1,12 @@
-import { Component, EventEmitter, Output, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Output,
+  ViewEncapsulation,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-speed-mode',
@@ -15,10 +21,15 @@ export class SpeedModeComponent {
 
   showSettings = false;
 
+  gridSize = 24;
+  wrapEdges = false;
+  startingLength = 5;
   speedStart = 5;
   accelRate = 1.0;
   timeAttack = 120;
   obstaclesOn = false;
+
+  constructor(private router: Router) {}
 
   onNext() {
     this.showSettings = true;
@@ -26,11 +37,19 @@ export class SpeedModeComponent {
   }
 
   onStartSpeed() {
-    console.log('[Speed] start with:', {
-      speedStart: this.speedStart,
-      accelRate: this.accelRate,
-      timeAttack: this.timeAttack,
-      obstaclesOn: this.obstaclesOn,
+    this.router.navigateByUrl('/play', {
+      state: {
+        mode: 'speed',
+        speedSettings: {
+          startingSpeed: this.speedStart,
+          accelRate: this.accelRate,
+          timeAttackSec: this.timeAttack,
+          obstaclesOn: this.obstaclesOn,
+          gridSize: this.gridSize,
+          wrapEdges: this.wrapEdges,
+          startingLength: this.startingLength,
+        },
+      },
     });
   }
 

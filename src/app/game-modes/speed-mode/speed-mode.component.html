@@ -61,6 +61,38 @@
 
         <div class="options">
           <label class="opt">
+            <span>Columns (width)</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="10"
+                max="60"
+                step="1"
+                [(ngModel)]="gridSize"
+                aria-label="Columns (width)"
+              />
+              <span class="range-value">{{ gridSize }} × 26</span>
+            </div>
+          </label>
+
+          <label class="opt">
+            <span>Starting Length</span>
+            <div class="range-wrap">
+              <input
+                class="range"
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                [(ngModel)]="startingLength"
+                aria-label="Starting length"
+              />
+              <span class="range-value">{{ startingLength }}</span>
+            </div>
+          </label>
+
+          <label class="opt">
             <span>Starting Speed</span>
             <div class="range-wrap">
               <input
@@ -109,6 +141,18 @@
           </label>
 
           <label class="opt row">
+            <span>Wrap Edges</span>
+            <label class="switch small">
+              <input
+                type="checkbox"
+                [(ngModel)]="wrapEdges"
+                aria-label="Wrap edges"
+              />
+              <span class="slider"></span>
+            </label>
+          </label>
+
+          <label class="opt row">
             <span>Obstacles</span>
             <label class="switch small">
               <input
@@ -126,7 +170,8 @@
         <div class="preview">
           <img src="assets/speed-preview.svg" alt="Speed preview" />
           <div class="hint">
-            Start: {{ speedStart }} • Accel: {{ accelRate }} • {{ timeAttack }}s
+            Grid: {{ gridSize }}×26 • Start: {{ speedStart }} • Accel:
+            {{ accelRate }} • {{ timeAttack }}s
           </div>
         </div>
       </div>
