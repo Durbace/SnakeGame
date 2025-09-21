@@ -442,38 +442,49 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private generateObstacles() {
-    this.obstacles.clear();
-    if (!this.isSpeedMode || !this.obstaclesOn) return;
+  this.obstacles.clear();
+  if (!this.isSpeedMode || !this.obstaclesOn) return;
 
-    const density = this.speedSettings?.obstacleDensity ?? 0.06;
-    const candidateCells: Cell[] = [];
+  const candidateCells: Cell[] = [];
+  for (let y = 0; y < this.rows; y++) {
+    for (let x = 0; x < this.cols; x++) candidateCells.push({ x, y });
+  }
 
-    for (let y = 0; y < this.rows; y++) {
-      for (let x = 0; x < this.cols; x++) {
-        candidateCells.push({ x, y });
-      }
-    }
+  const midY = Math.floor(this.rows / 2);
+  const reserved = new Set<string>();
+  for (let i = 0; i < this.snakeInitLen + 3; i++) {
+    reserved.add(this.keyOf({ x: i, y: midY }));
+  }
 
-    const midY = Math.floor(this.rows / 2);
-    const reserved = new Set<string>();
-    for (let i = 0; i < this.snakeInitLen + 3; i++) {
-      reserved.add(this.keyOf({ x: i, y: midY }));
-    }
+  const total = candidateCells.length;
 
-    const total = candidateCells.length;
-    const target = Math.floor(total * Math.max(0, Math.min(0.25, density)));
+  const preset = (this.speedSettings as any)?.obstaclePreset as 'easy'|'medium'|'hard' ?? 'medium';
+  const d = Math.max(0, Math.min(0.25, this.speedSettings?.obstacleDensity ?? 0.02));
 
-    let added = 0;
-    while (added < target) {
-      const idx = Math.floor(Math.random() * candidateCells.length);
-      const c = candidateCells[idx];
-      const k = this.keyOf(c);
-      if (!reserved.has(k)) {
-        this.obstacles.add(k);
-        added++;
-      }
+  let target: number;
+  if (preset === 'easy') {
+    // folosește densitatea, dar păstrează “puține” (4–10)
+    const approx = Math.floor(total * d);
+    target = Math.max(4, Math.min(approx, 10));
+  } else if (preset === 'medium') {
+    // moderat (~3% din celule, min 10)
+    target = Math.max(10, Math.floor(total * 0.03));
+  } else {
+    // hard = densitatea din setări (ex: 12%)
+    target = Math.floor(total * d);
+  }
+
+  let added = 0;
+  while (added < target) {
+    const idx = Math.floor(Math.random() * candidateCells.length);
+    const c = candidateCells[idx];
+    const k = this.keyOf(c);
+    if (!reserved.has(k) && !this.obstacles.has(k)) {
+      this.obstacles.add(k);
+      added++;
     }
   }
+}
 
   private spawnFood() {
     while (true) {

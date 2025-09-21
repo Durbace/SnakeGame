@@ -152,8 +152,10 @@
             </label>
           </label>
 
-          <label class="opt row">
+          <label class="opt row obst-row">
             <span>Obstacles</span>
+
+            <!-- switch -->
             <label class="switch small">
               <input
                 type="checkbox"
@@ -162,6 +164,43 @@
               />
               <span class="slider"></span>
             </label>
+
+            <!-- preseturi + micro-hint, PE ACELAȘI RÂND, la dreapta -->
+            <div class="obst-inline" [class.disabled]="!obstaclesOn">
+              <div class="obst-presets">
+                <button
+                  type="button"
+                  class="seg-btn"
+                  [class.active]="obstaclePreset === 'easy'"
+                  (click)="setObstaclePreset('easy')"
+                  [attr.aria-pressed]="obstaclePreset === 'easy'"
+                >
+                  Easy
+                </button>
+                <button
+                  type="button"
+                  class="seg-btn"
+                  [class.active]="obstaclePreset === 'medium'"
+                  (click)="setObstaclePreset('medium')"
+                  [attr.aria-pressed]="obstaclePreset === 'medium'"
+                >
+                  Medium
+                </button>
+                <button
+                  type="button"
+                  class="seg-btn"
+                  [class.active]="obstaclePreset === 'hard'"
+                  (click)="setObstaclePreset('hard')"
+                  [attr.aria-pressed]="obstaclePreset === 'hard'"
+                >
+                  Hard
+                </button>
+              </div>
+
+              <span class="micro-hint-inline">
+                ~{{ obstacleDensity * 100 | number : "1.0-0" }}%
+              </span>
+            </div>
           </label>
         </div>
       </div>

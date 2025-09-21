@@ -57,13 +57,13 @@ export class HomeComponent {
 
   constructor(private router: Router) {}
 
- private goToPlay(
-  mode: 'classic' | 'speed' | 'challenge',
-  extraState: Record<string, any> = {}
-) {
-  this.closeModal();
-  this.router.navigate(['/play'], { state: { mode, ...extraState } });
-}
+  private goToPlay(
+    mode: 'classic' | 'speed' | 'challenge',
+    extraState: Record<string, any> = {}
+  ) {
+    this.closeModal();
+    this.router.navigate(['/play'], { state: { mode, ...extraState } });
+  }
 
   get modalTitle(): string {
     switch (this.modalType) {
@@ -146,6 +146,10 @@ export class HomeComponent {
         accelRate: this.speedRef.accelRate,
         timeAttackSec: this.speedRef.timeAttack,
         obstaclesOn: this.speedRef.obstaclesOn,
+
+        obstaclePreset: this.speedRef.obstaclePreset,
+        obstacleDensity: this.speedRef.obstaclesOn ? this.speedRef.obstacleDensity : undefined,
+
         gridSize: this.speedRef.gridSize,
         wrapEdges: this.speedRef.wrapEdges,
         startingLength: this.speedRef.startingLength,
@@ -156,6 +160,7 @@ export class HomeComponent {
   }
   return;
 }
+
 
     if (this.modalType === 'challenge' && this.challengeRef) {
       if (this.challengeRef.isInSettings) {
