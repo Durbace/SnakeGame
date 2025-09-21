@@ -166,4 +166,5 @@ export class GameStageComponent implements OnInit {
 
     this.activeGame()?.handleKey(e.key);
   }
+  
 }

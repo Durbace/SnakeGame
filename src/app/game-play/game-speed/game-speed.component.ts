@@ -545,15 +545,6 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
         this.cellSize
       );
     }
-
-    if (this.isSpeedMode) {
-      this.ctx.fillStyle = '#000';
-      this.ctx.font = 'bold 12px monospace';
-      this.ctx.textAlign = 'left';
-      const secs = Math.ceil(this.timeLeftMs / 1000);
-      this.ctx.fillText(`TIME: ${secs}s`, 6, 14);
-      this.ctx.fillText(`SPD: ${this.gameSpeed.toFixed(2)}x`, 6, 28);
-    }
   }
 
   public onCanvasClick(): void {

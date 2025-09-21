@@ -82,22 +82,11 @@
     <div class="left">
       <span class="muted">Mode:</span>
       <span class="pill">{{ mode || "—" }}</span>
-      <span class="pill" *ngIf="mode === 'classic'">{{ difficulty }}</span>
-      <span class="muted" *ngIf="mode === 'speed'"
-        >&nbsp;•&nbsp;Obstacles:</span
-      >
-      <span class="pill" *ngIf="mode === 'speed'">{{
-        speedSettings.obstaclesOn ? "On" : "Off"
-      }}</span>
-    </div>
-    <div class="right">
-      <span class="ico-speed" aria-hidden="true"></span>
-      <span class="muted">Game Speed:</span>
-      <strong>{{ gameSpeed | number : "1.0-1" }}x</strong>
+
       <ng-container *ngIf="mode === 'speed'">
-        <span class="sep" aria-hidden="true">&nbsp;|&nbsp;</span>
-        <span class="muted">Time Left:</span>
-        <strong>{{ timeLeft }}s</strong>
+        <span class="sep" aria-hidden="true">&nbsp;•&nbsp;</span>
+        <span class="muted">Obstacles:</span>
+        <span class="pill">{{ speedSettings.obstaclesOn ? "On" : "Off" }}</span>
       </ng-container>
     </div>
   </footer>
