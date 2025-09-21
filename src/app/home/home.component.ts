@@ -127,10 +127,12 @@ export class HomeComponent {
     if (this.modalType === 'classic' && this.classicRef) {
       if (this.classicRef.isInSettings) {
         this.goToPlay('classic', {
-          gridSize: this.classicRef.gridSize,
-          wrapEdges: this.classicRef.wrapEdges,
-          startingLength: this.classicRef.startingLength,
-          startingSpeed: this.classicRef.startingSpeed,
+          settings: {
+            gridSize: this.classicRef.gridSize,
+            wrapEdges: this.classicRef.wrapEdges,
+            startingLength: this.classicRef.startingLength,
+            startingSpeed: this.classicRef.startingSpeed,
+          },
         });
       } else {
         this.classicRef.onNext();
@@ -139,28 +141,29 @@ export class HomeComponent {
     }
 
     if (this.modalType === 'speed' && this.speedRef) {
-  if (this.speedRef.isInSettings) {
-    this.goToPlay('speed', {
-      speedSettings: {
-        startingSpeed: this.speedRef.speedStart,
-        accelRate: this.speedRef.accelRate,
-        timeAttackSec: this.speedRef.timeAttack,
-        obstaclesOn: this.speedRef.obstaclesOn,
+      if (this.speedRef.isInSettings) {
+        this.goToPlay('speed', {
+          speedSettings: {
+            startingSpeed: this.speedRef.speedStart,
+            accelRate: this.speedRef.accelRate,
+            timeAttackSec: this.speedRef.timeAttack,
+            obstaclesOn: this.speedRef.obstaclesOn,
 
-        obstaclePreset: this.speedRef.obstaclePreset,
-        obstacleDensity: this.speedRef.obstaclesOn ? this.speedRef.obstacleDensity : undefined,
+            obstaclePreset: this.speedRef.obstaclePreset,
+            obstacleDensity: this.speedRef.obstaclesOn
+              ? this.speedRef.obstacleDensity
+              : undefined,
 
-        gridSize: this.speedRef.gridSize,
-        wrapEdges: this.speedRef.wrapEdges,
-        startingLength: this.speedRef.startingLength,
-      },
-    });
-  } else {
-    this.speedRef.onNext();
-  }
-  return;
-}
-
+            gridSize: this.speedRef.gridSize,
+            wrapEdges: this.speedRef.wrapEdges,
+            startingLength: this.speedRef.startingLength,
+          },
+        });
+      } else {
+        this.speedRef.onNext();
+      }
+      return;
+    }
 
     if (this.modalType === 'challenge' && this.challengeRef) {
       if (this.challengeRef.isInSettings) {

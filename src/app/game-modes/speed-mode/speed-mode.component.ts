@@ -32,7 +32,7 @@ export class SpeedModeComponent {
 
   obstaclesOn = false;
   obstaclePreset: ObstaclePreset = 'medium';
-  obstacleDensity = 0.08; // default pt "medium" (8% din celule)
+  obstacleDensity = 0.08; 
 
   constructor(private router: Router) {}
 
@@ -41,14 +41,12 @@ export class SpeedModeComponent {
     this.settingsStateChange.emit(true);
   }
 
-  // apelate de butoane
   setObstaclePreset(p: ObstaclePreset) {
   this.obstaclePreset = p;
-  // Easy = aproape nimic, Medium = moderat, Hard = dens
   this.obstacleDensity =
-    p === 'easy'   ? 0.02 :   // 0.2%
-    p === 'medium' ? 0.05  :   // 5%
-                     0.09;     // 12%
+    p === 'easy'   ? 0.02 : 
+    p === 'medium' ? 0.05  : 
+                     0.09; 
 }
 
   onStartSpeed() {
@@ -60,7 +58,7 @@ export class SpeedModeComponent {
         accelRate: this.accelRate,
         timeAttackSec: this.timeAttack,
         obstaclesOn: this.obstaclesOn,
-        obstaclePreset: this.obstaclePreset,                // 👈 trimitem presetul
+        obstaclePreset: this.obstaclePreset, 
         obstacleDensity: this.obstaclesOn ? this.obstacleDensity : undefined,
         gridSize: this.gridSize,
         wrapEdges: this.wrapEdges,

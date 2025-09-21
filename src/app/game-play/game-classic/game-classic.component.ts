@@ -27,7 +27,9 @@ export interface ClassicSettings {
   templateUrl: './game-classic.component.html',
   styleUrls: ['./game-classic.component.css'],
 })
-export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges {
+export class GameClassicComponent
+  implements AfterViewInit, OnDestroy, OnChanges
+{
   @Input() mode: 'classic' | 'speed' | 'challenge' | null = null;
   @Input() classicSettings: ClassicSettings | null = null;
 
@@ -38,7 +40,7 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
   @Output() highScoreChange = new EventEmitter<number>();
   @Output() speedChange = new EventEmitter<number>();
   @Output() gameOver = new EventEmitter<void>();
-  @Output() requestRestart = new EventEmitter<void>(); 
+  @Output() requestRestart = new EventEmitter<void>();
   @Output() resumeRequested = new EventEmitter<void>();
 
   @ViewChild('screen', { static: false })
@@ -65,6 +67,7 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
   private vy = 0;
   private food!: Cell;
   private over = false;
+  private baseTickMs = 120;
 
   private snakeInitLen = 5;
 
@@ -89,9 +92,7 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
   ngAfterViewInit(): void {
     this.viewInited = true;
     if (this.classicSettings) this.applyClassicSettings(this.classicSettings);
-
     this.recomputeTickFromGameSpeed();
-
     this.setupCanvas();
     this.resetGame();
   }
@@ -101,15 +102,15 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
   }
 
   public setPaused(p: boolean): void {
-  this.paused = p;
-  if (this.paused && !this.over) {
-    this.drawAll();
-    this.drawPauseOverlay();
+    this.paused = p;
+    if (this.paused && !this.over) {
+      this.drawAll();
+      this.drawPauseOverlay();
+    }
+    if (!this.paused && !this.over) {
+      this.drawAll();
+    }
   }
-  if (!this.paused && !this.over) {
-    this.drawAll();
-  }
-}
 
   public restart(): void {
     this.resetGame();
@@ -122,10 +123,19 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
     const goingRight = this.vx === 1;
     const goingLeft = this.vx === -1;
 
-    if ((k === 'ArrowLeft' || k.toLowerCase() === 'a') && !goingRight)      { this.vx = -1; this.vy = 0; }
-    else if ((k === 'ArrowUp' || k.toLowerCase() === 'w') && !goingDown)    { this.vx = 0;  this.vy = -1; }
-    else if ((k === 'ArrowRight' || k.toLowerCase() === 'd') && !goingLeft) { this.vx = 1;  this.vy = 0; }
-    else if ((k === 'ArrowDown' || k.toLowerCase() === 's') && !goingUp)    { this.vx = 0;  this.vy = 1; }
+    if ((k === 'ArrowLeft' || k.toLowerCase() === 'a') && !goingRight) {
+      this.vx = -1;
+      this.vy = 0;
+    } else if ((k === 'ArrowUp' || k.toLowerCase() === 'w') && !goingDown) {
+      this.vx = 0;
+      this.vy = -1;
+    } else if ((k === 'ArrowRight' || k.toLowerCase() === 'd') && !goingLeft) {
+      this.vx = 1;
+      this.vy = 0;
+    } else if ((k === 'ArrowDown' || k.toLowerCase() === 's') && !goingUp) {
+      this.vx = 0;
+      this.vy = 1;
+    }
   }
 
   private applyClassicSettings(s: ClassicSettings) {
@@ -136,19 +146,21 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
 
     this.wrapEdges = !!s.wrapEdges;
 
-    if (Number.isFinite(s.startingSpeed)) {
-      const sp = Math.min(10, Math.max(1, Math.floor(s.startingSpeed)));
-      const MAX = 240, MIN = 60;
-      this.tickMs = Math.round(MAX - (sp - 1) * ((MAX - MIN) / 9));
-    }
+    const sp = Math.min(10, Math.max(1, Math.floor(s.startingSpeed)));
+    const MAX = 240,
+      MIN = 60;
+    const tick = Math.round(MAX - (sp - 1) * ((MAX - MIN) / 9));
+
+    this.baseTickMs = tick;
+    this.tickMs = tick;
+
+    this.gameSpeed = sp;
 
     this.snakeInitLen = Math.min(50, Math.max(1, Math.floor(s.startingLength)));
   }
 
   private recomputeTickFromGameSpeed() {
-    const base = this.tickMs || 120;
-    const factor = Math.max(0.2, Number(this.gameSpeed) || 1);
-    this.tickMs = Math.max(20, Math.floor(base / factor));
+    this.tickMs = this.baseTickMs;
   }
 
   private setupCanvas() {
@@ -224,14 +236,20 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
       this.snake.pop();
     }
 
-    if (!this.wrapEdges &&
-        (head.x < 0 || head.x >= this.cols || head.y < 0 || head.y >= this.rows)) {
-      this.finishGame(); return;
+    if (
+      !this.wrapEdges &&
+      (head.x < 0 || head.x >= this.cols || head.y < 0 || head.y >= this.rows)
+    ) {
+      this.finishGame();
+      return;
     }
 
     for (let i = 1; i < this.snake.length; i++) {
       const p = this.snake[i];
-      if (p.x === head.x && p.y === head.y) { this.finishGame(); return; }
+      if (p.x === head.x && p.y === head.y) {
+        this.finishGame();
+        return;
+      }
     }
 
     this.drawAll();
@@ -245,15 +263,28 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
     this.ctx.save();
     this.ctx.globalAlpha = 0.7;
     this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
+    this.ctx.fillRect(
+      0,
+      0,
+      this.cols * this.cellSize,
+      this.rows * this.cellSize
+    );
     this.ctx.restore();
 
     this.ctx.fillStyle = '#fff';
     this.ctx.font = 'bold 24px monospace';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('Game Over', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2);
+    this.ctx.fillText(
+      'Game Over',
+      (this.cols * this.cellSize) / 2,
+      (this.rows * this.cellSize) / 2
+    );
     this.ctx.font = '14px monospace';
-    this.ctx.fillText('Click to Restart', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2 + 28);
+    this.ctx.fillText(
+      'Click to Restart',
+      (this.cols * this.cellSize) / 2,
+      (this.rows * this.cellSize) / 2 + 28
+    );
 
     this.gameOver.emit();
   }
@@ -263,48 +294,75 @@ export class GameClassicComponent implements AfterViewInit, OnDestroy, OnChanges
       const fx = Math.floor(Math.random() * this.cols);
       const fy = Math.floor(Math.random() * this.rows);
       const onSnake = this.snake.some((p) => p.x === fx && p.y === fy);
-      if (!onSnake) { this.food = { x: fx, y: fy }; return; }
+      if (!onSnake) {
+        this.food = { x: fx, y: fy };
+        return;
+      }
     }
   }
 
   private drawAll() {
     this.ctx.fillStyle = '#f3f3f3';
-    this.ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
+    this.ctx.fillRect(
+      0,
+      0,
+      this.cols * this.cellSize,
+      this.rows * this.cellSize
+    );
 
     this.ctx.fillStyle = 'red';
-    this.ctx.fillRect(this.food.x * this.cellSize, this.food.y * this.cellSize, this.cellSize, this.cellSize);
+    this.ctx.fillRect(
+      this.food.x * this.cellSize,
+      this.food.y * this.cellSize,
+      this.cellSize,
+      this.cellSize
+    );
 
     this.ctx.fillStyle = '#111';
     for (const part of this.snake) {
-      this.ctx.fillRect(part.x * this.cellSize, part.y * this.cellSize, this.cellSize, this.cellSize);
+      this.ctx.fillRect(
+        part.x * this.cellSize,
+        part.y * this.cellSize,
+        this.cellSize,
+        this.cellSize
+      );
     }
   }
 
   public onCanvasClick(): void {
-  if (this.over) {
-    this.requestRestart.emit();
-    return;
+    if (this.over) {
+      this.requestRestart.emit();
+      return;
+    }
+    if (this.paused) {
+      this.resumeRequested.emit();
+    }
   }
-  if (this.paused) {
-    this.resumeRequested.emit();
-  }
-}
-private drawPauseOverlay() {
-  this.ctx.save();
-  this.ctx.globalAlpha = 0.7;
-  this.ctx.fillStyle = '#000';
-  this.ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
-  this.ctx.restore();
+  private drawPauseOverlay() {
+    this.ctx.save();
+    this.ctx.globalAlpha = 0.7;
+    this.ctx.fillStyle = '#000';
+    this.ctx.fillRect(
+      0,
+      0,
+      this.cols * this.cellSize,
+      this.rows * this.cellSize
+    );
+    this.ctx.restore();
 
-  this.ctx.fillStyle = '#fff';
-  this.ctx.textAlign = 'center';
-  this.ctx.font = 'bold 24px monospace';
-  this.ctx.fillText('Paused', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2);
-  this.ctx.font = '14px monospace';
-  this.ctx.fillText(
-    'Click to resume',
-    (this.cols * this.cellSize) / 2,
-    (this.rows * this.cellSize) / 2 + 28
-  );
-}
+    this.ctx.fillStyle = '#fff';
+    this.ctx.textAlign = 'center';
+    this.ctx.font = 'bold 24px monospace';
+    this.ctx.fillText(
+      'Paused',
+      (this.cols * this.cellSize) / 2,
+      (this.rows * this.cellSize) / 2
+    );
+    this.ctx.font = '14px monospace';
+    this.ctx.fillText(
+      'Click to resume',
+      (this.cols * this.cellSize) / 2,
+      (this.rows * this.cellSize) / 2 + 28
+    );
+  }
 }

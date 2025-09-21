@@ -24,7 +24,6 @@ import { HowToPlayComponent } from '../how-to-play/how-to-play.component';
   encapsulation: ViewEncapsulation.ShadowDom,
 })
 export class GameStageComponent implements OnInit {
-  // Header / HUD inputs (pot fi suprascrise din parent dacă vrei)
   @Input() title = 'Retro Snake';
   @Input() score = 0;
   @Input() highScore = 0;
@@ -38,10 +37,8 @@ export class GameStageComponent implements OnInit {
 
   mode: 'classic' | 'speed' | 'challenge' | null = null;
 
-  // Setări Classic (exact ca înainte)
   settings: any = null;
 
-  // Setări Speed (venite din SpeedModeComponent)
   speedSettings: SpeedModeSettings = {
     startingSpeed: 5,
     accelRate: 1.0,
@@ -52,10 +49,8 @@ export class GameStageComponent implements OnInit {
     startingLength: 5,
   };
 
-  // HUD suplimentar pentru Speed Mode
-  timeLeft = 0; // secunde rămase (actualizat de game-speed)
+  timeLeft = 0;
 
-  // Referințe la board
   @ViewChild(GameClassicComponent) classicRef?: GameClassicComponent;
   @ViewChild(GameSpeedComponent) speedRef?: GameSpeedComponent;
 
@@ -65,25 +60,29 @@ export class GameStageComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit() {
-    // Preluăm state din router (mode + setări)
-    const st = this.router.getCurrentNavigation()?.extras?.state ?? window.history.state;
+  const st = this.router.getCurrentNavigation()?.extras?.state ?? window.history.state;
 
-    this.mode = st?.mode ?? this.mode ?? null;
-    this.settings = st?.settings ?? this.settings ?? null;
+  this.mode = st?.mode ?? this.mode ?? null;
+  this.settings = st?.settings ?? this.settings ?? null;
 
-    // dacă vin setări de speed din alt ecran (SpeedModeComponent)
-    const s = st?.speedSettings as Partial<SpeedModeSettings> | undefined;
-    if (s) this.speedSettings = { ...this.speedSettings, ...s };
+  const s = st?.speedSettings as Partial<SpeedModeSettings> | undefined;
+  if (s) this.speedSettings = { ...this.speedSettings, ...s };
+
+  if (this.mode === 'classic' && this.settings?.startingSpeed != null) {
+    const sp = Math.min(10, Math.max(1, Math.floor(this.settings.startingSpeed)));
+    this.gameSpeed = sp;
   }
 
-  // ——— Helpers ———
+  if (this.mode === 'speed') {
+    this.timeLeft = this.speedSettings.timeAttackSec ?? 0;
+  }
+}
+
   private activeGame() {
-    // întoarce componenta activă, în funcție de mod
     if (this.mode === 'speed') return this.speedRef;
     return this.classicRef;
   }
 
-  // ——— Top bar actions ———
   onClickHome() {
     this.router.navigate(['/']);
   }
@@ -101,7 +100,6 @@ export class GameStageComponent implements OnInit {
 
   closeHowTo() {
     this.showHowTo = false;
-    // dacă nu era pauzat înainte, revenim la gameplay
     if (!this.wasPausedBeforeHowTo) {
       this.paused = false;
       this.activeGame()?.setPaused(false);
@@ -124,7 +122,6 @@ export class GameStageComponent implements OnInit {
     this.activeGame()?.setPaused(this.paused);
   }
 
-  // ——— Event handlers din board ———
   handleScoreChange(val: number) {
     this.score = val;
     if (this.score > this.highScore) this.highScore = this.score;
@@ -146,12 +143,10 @@ export class GameStageComponent implements OnInit {
     if (this.paused) this.onClickPauseToggle();
   }
 
-  // Doar în Speed Mode: primește timpul rămas
   handleTimeLeftChange(sec: number) {
     this.timeLeft = sec;
   }
 
-  // ——— Keyboard ———
   @HostListener('window:keydown', ['$event'])
   onKeydown(e: KeyboardEvent) {
     const key = e.key.toLowerCase();
@@ -162,7 +157,6 @@ export class GameStageComponent implements OnInit {
       return;
     }
 
-    // prevenim scroll arrow/space
     if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase())) {
       e.preventDefault();
     }

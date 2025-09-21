@@ -16,8 +16,12 @@
       <button
         class="btn pause"
         (click)="onClickPauseToggle()"
-        [attr.aria-label]="paused ? 'Resume' : 'Pause'">
-        <span [ngClass]="paused ? 'ico-play' : 'ico-pause'" aria-hidden="true"></span>
+        [attr.aria-label]="paused ? 'Resume' : 'Pause'"
+      >
+        <span
+          [ngClass]="paused ? 'ico-play' : 'ico-pause'"
+          aria-hidden="true"
+        ></span>
         {{ paused ? "Resume" : "Pause" }}
       </button>
     </nav>
@@ -34,7 +38,7 @@
           <div class="value small">{{ timeLeft }}s</div>
 
           <div class="label small">Speed</div>
-          <div class="value small">{{ gameSpeed | number : '1.2-2' }}x</div>
+          <div class="value small">{{ gameSpeed | number : "1.2-2" }}x</div>
         </ng-container>
       </aside>
 
@@ -43,7 +47,7 @@
         [mode]="mode"
         [paused]="paused"
         [gameSpeed]="gameSpeed"
-        [classicSettings]="mode === 'classic' ? settings : null"
+        [classicSettings]="settings"
         (scoreChange)="handleScoreChange($event)"
         (highScoreChange)="handleHighScoreChange($event)"
         (speedChange)="handleSpeedChange($event)"
@@ -67,9 +71,6 @@
         (resumeRequested)="handleResumeRequested()"
       ></app-game-speed>
 
-      <!-- (opțional) CHALLENGE păstrat pentru viitor -->
-      <!-- <app-game-challenge *ngIf="mode==='challenge'">...</app-game-challenge> -->
-
       <aside class="score-side right">
         <div class="label">High<br />Score</div>
         <div class="value">{{ highScore }}</div>
@@ -80,17 +81,20 @@
   <footer class="bottombar">
     <div class="left">
       <span class="muted">Mode:</span>
-      <span class="pill">{{ mode || '—' }}</span>
-      <span class="muted" *ngIf="mode==='classic'">&nbsp;•&nbsp;Difficulty:</span>
-      <span class="pill" *ngIf="mode==='classic'">{{ difficulty }}</span>
-      <span class="muted" *ngIf="mode==='speed'">&nbsp;•&nbsp;Obstacles:</span>
-      <span class="pill" *ngIf="mode==='speed'">{{ speedSettings.obstaclesOn ? 'On' : 'Off' }}</span>
+      <span class="pill">{{ mode || "—" }}</span>
+      <span class="pill" *ngIf="mode === 'classic'">{{ difficulty }}</span>
+      <span class="muted" *ngIf="mode === 'speed'"
+        >&nbsp;•&nbsp;Obstacles:</span
+      >
+      <span class="pill" *ngIf="mode === 'speed'">{{
+        speedSettings.obstaclesOn ? "On" : "Off"
+      }}</span>
     </div>
     <div class="right">
       <span class="ico-speed" aria-hidden="true"></span>
       <span class="muted">Game Speed:</span>
       <strong>{{ gameSpeed | number : "1.0-1" }}x</strong>
-      <ng-container *ngIf="mode==='speed'">
+      <ng-container *ngIf="mode === 'speed'">
         <span class="sep" aria-hidden="true">&nbsp;|&nbsp;</span>
         <span class="muted">Time Left:</span>
         <strong>{{ timeLeft }}s</strong>
@@ -104,7 +108,9 @@
   <div class="modal-panel" tabindex="-1">
     <header class="modal-header">
       <h3>How to Play</h3>
-      <button class="modal-close" (click)="closeHowTo()" aria-label="Close">×</button>
+      <button class="modal-close" (click)="closeHowTo()" aria-label="Close">
+        ×
+      </button>
     </header>
     <div class="modal-body">
       <app-how-to-play></app-how-to-play>
