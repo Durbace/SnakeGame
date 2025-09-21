@@ -140,31 +140,34 @@
             </div>
           </label>
 
-          <label class="opt row">
-            <span>Wrap Edges</span>
-            <label class="switch small">
-              <input
-                type="checkbox"
-                [(ngModel)]="wrapEdges"
-                aria-label="Wrap edges"
-              />
-              <span class="slider"></span>
-            </label>
-          </label>
+          <div class="opt row inline-switch">
+            <div class="lhs">
+              <span>Wrap Edges</span>
+              <label class="switch small">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="wrapEdges"
+                  aria-label="Wrap edges"
+                />
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
 
-          <label class="opt row obst-row">
-            <span>Obstacles</span>
+          <div class="opt row obst-row">
+            <div class="obst-lhs">
+              <span>Obstacles</span>
+              <label class="switch small">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="obstaclesOn"
+                  aria-label="Obstacles on"
+                />
+                <span class="slider"></span>
+              </label>
+            </div>
 
-            <label class="switch small">
-              <input
-                type="checkbox"
-                [(ngModel)]="obstaclesOn"
-                aria-label="Obstacles on"
-              />
-              <span class="slider"></span>
-            </label>
-
-            <div class="obst-inline" [class.disabled]="!obstaclesOn">
+            <div class="obst-rhs" *ngIf="obstaclesOn">
               <div class="obst-presets">
                 <button
                   type="button"
@@ -199,7 +202,7 @@
                 ~{{ obstacleDensity * 100 | number : "1.0-0" }}%
               </span>
             </div>
-          </label>
+          </div>
         </div>
       </div>
 

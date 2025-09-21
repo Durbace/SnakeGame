@@ -32,7 +32,7 @@ export class SpeedModeComponent {
 
   obstaclesOn = false;
   obstaclePreset: ObstaclePreset = 'medium';
-  obstacleDensity = 0.08; 
+  obstacleDensity = 0.08;
 
   constructor(private router: Router) {}
 
@@ -42,34 +42,35 @@ export class SpeedModeComponent {
   }
 
   setObstaclePreset(p: ObstaclePreset) {
-  this.obstaclePreset = p;
-  this.obstacleDensity =
-    p === 'easy'   ? 0.02 : 
-    p === 'medium' ? 0.05  : 
-                     0.09; 
-}
+    if (!this.obstaclesOn) return;
+    this.obstaclePreset = p;
+    this.obstacleDensity = p === 'easy' ? 0.02 : p === 'medium' ? 0.05 : 0.09;
+  }
 
   onStartSpeed() {
-  this.router.navigateByUrl('/play', {
-    state: {
-      mode: 'speed',
-      speedSettings: {
-        startingSpeed: this.speedStart,
-        accelRate: this.accelRate,
-        timeAttackSec: this.timeAttack,
-        obstaclesOn: this.obstaclesOn,
-        obstaclePreset: this.obstaclePreset, 
-        obstacleDensity: this.obstaclesOn ? this.obstacleDensity : undefined,
-        gridSize: this.gridSize,
-        wrapEdges: this.wrapEdges,
-        startingLength: this.startingLength,
+    this.router.navigateByUrl('/play', {
+      state: {
+        mode: 'speed',
+        speedSettings: {
+          startingSpeed: this.speedStart,
+          accelRate: this.accelRate,
+          timeAttackSec: this.timeAttack,
+          obstaclesOn: this.obstaclesOn,
+          obstaclePreset: this.obstaclePreset,
+          obstacleDensity: this.obstaclesOn ? this.obstacleDensity : undefined,
+          gridSize: this.gridSize,
+          wrapEdges: this.wrapEdges,
+          startingLength: this.startingLength,
+        },
       },
-    },
-  });
-}
-
+    });
+  }
 
   get isInSettings(): boolean {
     return this.showSettings;
+  }
+
+  onObstaclesToggled() {
+    setTimeout(() => window.getSelection?.()?.removeAllRanges?.(), 0);
   }
 }
