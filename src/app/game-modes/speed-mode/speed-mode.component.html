@@ -140,34 +140,31 @@
             </div>
           </label>
 
-          <div class="opt row inline-switch">
-            <div class="lhs">
-              <span>Wrap Edges</span>
-              <label class="switch small">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="wrapEdges"
-                  aria-label="Wrap edges"
-                />
-                <span class="slider"></span>
-              </label>
-            </div>
+          <div class="opt row toggle-row">
+            <span class="label">Wrap Edges</span>
+            <label class="switch small">
+              <input
+                type="checkbox"
+                [(ngModel)]="wrapEdges"
+                aria-label="Wrap edges"
+              />
+              <span class="slider"></span>
+            </label>
+            <div class="extras"></div>
           </div>
 
-          <div class="opt row obst-row">
-            <div class="obst-lhs">
-              <span>Obstacles</span>
-              <label class="switch small">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="obstaclesOn"
-                  aria-label="Obstacles on"
-                />
-                <span class="slider"></span>
-              </label>
-            </div>
+          <div class="opt row toggle-row">
+            <span class="label">Obstacles</span>
+            <label class="switch small">
+              <input
+                type="checkbox"
+                [(ngModel)]="obstaclesOn"
+                aria-label="Obstacles on"
+              />
+              <span class="slider"></span>
+            </label>
 
-            <div class="obst-rhs" *ngIf="obstaclesOn">
+            <div class="extras" *ngIf="obstaclesOn">
               <div class="obst-presets">
                 <button
                   type="button"
@@ -197,10 +194,9 @@
                   Hard
                 </button>
               </div>
-
-              <span class="micro-hint-inline">
-                ~{{ obstacleDensity * 100 | number : "1.0-0" }}%
-              </span>
+              <span class="micro-hint-inline"
+                >~{{ obstacleDensity * 100 | number : "1.0-0" }}%</span
+              >
             </div>
           </div>
         </div>

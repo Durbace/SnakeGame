@@ -204,3 +204,27 @@
   color: #0f172a;
 }
 
+.opt.row.toggle-row {
+  --label-w: 120px; 
+  --switch-w: 46px;
+  display: grid;
+  grid-template-columns: var(--label-w) var(--switch-w) 1fr;
+  align-items: center;
+  column-gap: 8px; 
+  min-height: 32px;
+}
+
+.opt.row.toggle-row .label {
+  font-weight: 800;
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.opt.row.toggle-row .extras {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 26px; 
+}
+
