@@ -49,6 +49,7 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() gameSpeed = 1;
 
   @Input() autoResetOnDeath = false;
+  @Input() targetFruits: number | null = null;
 
   @Output() scoreChange = new EventEmitter<number>();
   @Output() highScoreChange = new EventEmitter<number>();
@@ -98,6 +99,7 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
   private ACCEL_SCALE = 0.08;
   private accelBuffer = 0;
   private APPLY_STEP = 0.04;
+  private fruitsCollected = 0;
 
   private keyOf(c: Cell) {
     return `${c.x},${c.y}`;
@@ -291,6 +293,7 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.vx = 1;
     this.vy = 0;
     this.score = 0;
+    this.fruitsCollected = 0;
     this.over = false;
 
     this.generateObstacles();
@@ -374,6 +377,14 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
         this.highScore = this.score;
         this.highScoreChange.emit(this.highScore);
       }
+
+      this.fruitsCollected++;
+      const target = Number(this.targetFruits ?? 0);
+      if (target > 0 && this.fruitsCollected >= target) {
+        this.finishGame();
+        return;
+      }
+
       this.spawnFood();
     } else {
       this.snake.pop();

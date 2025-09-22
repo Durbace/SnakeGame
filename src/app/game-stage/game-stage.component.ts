@@ -86,7 +86,6 @@ export class GameStageComponent implements OnInit {
     this.mode = st?.mode ?? this.mode ?? null;
     this.settings = st?.settings ?? this.settings ?? null;
 
-    // 👇 nou: citește goals din state (trimise din ChallengeMode)
     this.goals = st?.goals ?? this.goals ?? null;
 
     const s = st?.speedSettings as Partial<SpeedModeSettings> | undefined;
@@ -107,7 +106,6 @@ export class GameStageComponent implements OnInit {
       this.timeLeft = this.speedSettings.timeAttackSec ?? 0;
     }
 
-    // 👇 nou: setează timpul inițial și pentru challenge
     if (this.mode === 'challenge') {
       this.timeLeft = this.goals?.targetTime ?? 0;
     }

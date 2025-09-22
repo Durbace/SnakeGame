@@ -23,16 +23,23 @@ export interface ChallengeSettings {
 
 @Component({
   selector: 'app-game-challenge',
+  standalone: true,
   imports: [],
   templateUrl: './game-challenge.component.html',
-  styleUrl: './game-challenge.component.css'
+  styleUrl: './game-challenge.component.css',
 })
-export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChanges {
+export class GameChallengeComponent
+  implements AfterViewInit, OnDestroy, OnChanges
+{
   @Input() mode: 'classic' | 'speed' | 'challenge' | null = null;
   @Input() classicSettings: ChallengeSettings | null = null;
 
   @Input() paused = false;
   @Input() gameSpeed = 1;
+
+  @Input() timeLimitSec: number | null = null;
+  @Input() targetFruits: number | null = null;
+  @Output() timeLeftChange = new EventEmitter<number>();
 
   @Output() scoreChange = new EventEmitter<number>();
   @Output() highScoreChange = new EventEmitter<number>();
@@ -44,7 +51,6 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
   @ViewChild('screen', { static: false })
   canvasRef!: ElementRef<HTMLCanvasElement>;
 
-  // === Game state ===
   score = 0;
   private highScore = 0;
 
@@ -66,28 +72,26 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
   private vx = 1;
   private vy = 0;
 
-  // fruit
   private food!: Cell;
   private foodType: FruitType = 'normal';
-  private foodExpiresAt: number | null = null; // doar pentru golden
+  private foodExpiresAt: number | null = null; 
 
-  // obstacles
   private obstacles: Cell[] = [];
 
   private over = false;
   private snakeInitLen = 5;
 
-  // === Spawn chances (poți regla ușor) ===
-  // Totalul nu trebuie să fie 100; logica e pe “roulette wheel”.
-  private CHANCE_NORMAL = 0.70;
-  private CHANCE_TOXIC  = 0.12;
-  private CHANCE_GOLDEN = 0.10;
-  private CHANCE_FAKE   = 0.08;
+  private CHANCE_NORMAL = 0.7;
+  private CHANCE_TOXIC = 0.12;
+  private CHANCE_GOLDEN = 0.1;
+  private CHANCE_FAKE = 0.08;
 
-  // Golden durează 2s
   private GOLDEN_LIFETIME_MS = 2000;
-  // Fake: +2 obstacole
   private FAKE_OBSTACLES_ON_PICKUP = 2;
+
+  private timeLeft = 0;
+  private secondTimerId: any = null;
+  private fruitsCollected = 0;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['classicSettings'] && this.classicSettings) {
@@ -117,6 +121,7 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
 
   ngOnDestroy(): void {
     window.clearInterval(this.intervalId);
+    window.clearInterval(this.secondTimerId);
   }
 
   public setPaused(p: boolean): void {
@@ -142,13 +147,17 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
     const goingLeft = this.vx === -1;
 
     if ((k === 'ArrowLeft' || k.toLowerCase() === 'a') && !goingRight) {
-      this.vx = -1; this.vy = 0;
+      this.vx = -1;
+      this.vy = 0;
     } else if ((k === 'ArrowUp' || k.toLowerCase() === 'w') && !goingDown) {
-      this.vx = 0; this.vy = -1;
+      this.vx = 0;
+      this.vy = -1;
     } else if ((k === 'ArrowRight' || k.toLowerCase() === 'd') && !goingLeft) {
-      this.vx = 1; this.vy = 0;
+      this.vx = 1;
+      this.vy = 0;
     } else if ((k === 'ArrowDown' || k.toLowerCase() === 's') && !goingUp) {
-      this.vx = 0; this.vy = 1;
+      this.vx = 0;
+      this.vy = 1;
     }
   }
 
@@ -161,7 +170,8 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
     this.wrapEdges = !!s.wrapEdges;
 
     const sp = Math.min(10, Math.max(1, Math.floor(s.startingSpeed)));
-    const MAX = 240, MIN = 60;
+    const MAX = 240,
+      MIN = 60;
     const tick = Math.round(MAX - (sp - 1) * ((MAX - MIN) / 9));
 
     this.baseTickMs = tick;
@@ -201,14 +211,24 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
       x: this.snakeInitLen - 1 - i,
       y: midY,
     }));
-    this.vx = 1; this.vy = 0;
+    this.vx = 1;
+    this.vy = 0;
 
     this.score = 0;
     this.over = false;
     this.obstacles = [];
     this.foodExpiresAt = null;
+    this.fruitsCollected = 0;
 
-    this.spawnFood(); // alege și tipul
+    if (this.timeLimitSec && this.timeLimitSec > 0) {
+      this.startSecondTimer(this.timeLimitSec);
+    } else {
+      this.timeLeft = 0;
+      this.timeLeftChange.emit(0);
+      window.clearInterval(this.secondTimerId);
+    }
+
+    this.spawnFood();
     this.drawAll();
     this.restartInterval();
 
@@ -225,10 +245,8 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
   }
 
   private tick() {
-    // Golden despawn check
     if (this.foodType === 'golden' && this.foodExpiresAt !== null) {
       if (Date.now() >= this.foodExpiresAt) {
-        // expiră golden-ul
         this.spawnFood();
       }
     }
@@ -244,40 +262,50 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
 
     this.snake.unshift(head);
 
-    const ateFood = (head.x === this.food.x && head.y === this.food.y);
+    const ateFood = head.x === this.food.x && head.y === this.food.y;
 
     if (ateFood) {
-      // Efecte în funcție de tipul fructului:
+      let counted = false; 
+
       switch (this.foodType) {
         case 'normal':
           this.incrementScore(1);
+          counted = true; 
           break;
         case 'toxic':
           this.shrinkSnake(1);
-          // Toxic NU dă scor, doar scurtează
           break;
         case 'golden':
           this.incrementScore(3);
+          counted = true;
           break;
         case 'fake':
           this.addObstacles(this.FAKE_OBSTACLES_ON_PICKUP);
-          // Fake NU dă scor
           break;
       }
+
+      if (counted) {
+        this.fruitsCollected++;
+        const target = Math.max(0, this.targetFruits ?? 0);
+        if (target > 0 && this.fruitsCollected >= target) {
+          this.finishGame();
+          return;
+        }
+      }
+
       this.spawnFood();
     } else {
-      // nu a mâncat: se mișcă normal
       this.snake.pop();
     }
 
-    // Borders (dacă nu e wrap)
-    if (!this.wrapEdges &&
-      (head.x < 0 || head.x >= this.cols || head.y < 0 || head.y >= this.rows)) {
+    if (
+      !this.wrapEdges &&
+      (head.x < 0 || head.x >= this.cols || head.y < 0 || head.y >= this.rows)
+    ) {
       this.finishGame();
       return;
     }
 
-    // Self collision
     for (let i = 1; i < this.snake.length; i++) {
       const p = this.snake[i];
       if (p.x === head.x && p.y === head.y) {
@@ -286,8 +314,7 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
       }
     }
 
-    // Obstacles collision
-    if (this.obstacles.some(o => o.x === head.x && o.y === head.y)) {
+    if (this.obstacles.some((o) => o.x === head.x && o.y === head.y)) {
       this.finishGame();
       return;
     }
@@ -298,20 +325,34 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
   private finishGame() {
     this.over = true;
     window.clearInterval(this.intervalId);
+    window.clearInterval(this.secondTimerId);
     this.drawAll();
 
     this.ctx.save();
     this.ctx.globalAlpha = 0.7;
     this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
+    this.ctx.fillRect(
+      0,
+      0,
+      this.cols * this.cellSize,
+      this.rows * this.cellSize
+    );
     this.ctx.restore();
 
     this.ctx.fillStyle = '#fff';
     this.ctx.font = 'bold 24px monospace';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('Game Over', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2);
+    this.ctx.fillText(
+      'Game Over',
+      (this.cols * this.cellSize) / 2,
+      (this.rows * this.cellSize) / 2
+    );
     this.ctx.font = '14px monospace';
-    this.ctx.fillText('Click to Restart', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2 + 28);
+    this.ctx.fillText(
+      'Click to Restart',
+      (this.cols * this.cellSize) / 2,
+      (this.rows * this.cellSize) / 2 + 28
+    );
 
     this.gameOver.emit();
   }
@@ -345,7 +386,6 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
   }
 
   private randomFreeCell(): Cell | null {
-    // alege o celulă care nu e pe șarpe, nu e mâncare și nu e obstacol
     const used = new Set<string>();
     for (const s of this.snake) used.add(`${s.x},${s.y}`);
     for (const o of this.obstacles) used.add(`${o.x},${o.y}`);
@@ -354,13 +394,11 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
     const freeCount = this.cols * this.rows - used.size;
     if (freeCount <= 0) return null;
 
-    // încercări random limitate
     for (let tries = 0; tries < 200; tries++) {
       const x = Math.floor(Math.random() * this.cols);
       const y = Math.floor(Math.random() * this.rows);
       if (!used.has(`${x},${y}`)) return { x, y };
     }
-    // fallback: scan
     for (let y = 0; y < this.rows; y++) {
       for (let x = 0; x < this.cols; x++) {
         if (!used.has(`${x},${y}`)) return { x, y };
@@ -370,21 +408,17 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
   }
 
   private spawnFood() {
-    // alege tipul
     const r = Math.random();
     const t = this.pickFruitType(r);
     this.foodType = t;
 
-    // plasare pe celulă liberă
     const cell = this.randomFreeCell();
     if (!cell) {
-      // dacă nu mai e spațiu liber, jocul e practic complet — forțăm normal pe capul șarpelui (fail-safe)
       this.food = { x: 0, y: 0 };
     } else {
       this.food = cell;
     }
 
-    // setează/desetează expirarea pt golden
     if (t === 'golden') {
       this.foodExpiresAt = Date.now() + this.GOLDEN_LIFETIME_MS;
     } else {
@@ -403,12 +437,14 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
   }
 
   private drawAll() {
-    // background
     this.ctx.fillStyle = '#f3f3f3';
-    this.ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
+    this.ctx.fillRect(
+      0,
+      0,
+      this.cols * this.cellSize,
+      this.rows * this.cellSize
+    );
 
-    // food
-    // culori implicite: normal=red, toxic=purple, golden=gold, fake=orange
     const colorMap: Record<FruitType, string> = {
       normal: '#ef4444',
       toxic: '#7e22ce',
@@ -416,36 +452,56 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
       fake: '#f97316',
     };
 
-    // golden: mic efect “blink” când e pe ducă (ultimele 600ms)
     if (this.foodType === 'golden' && this.foodExpiresAt) {
       const remaining = this.foodExpiresAt - Date.now();
       if (remaining < 600 && remaining > 0) {
-        // 50% vizibilitate ca blink
         if (Math.floor(remaining / 100) % 2 === 0) {
-          // săr peste desenare ca să clipească
         } else {
           this.ctx.fillStyle = colorMap[this.foodType];
-          this.ctx.fillRect(this.food.x * this.cellSize, this.food.y * this.cellSize, this.cellSize, this.cellSize);
+          this.ctx.fillRect(
+            this.food.x * this.cellSize,
+            this.food.y * this.cellSize,
+            this.cellSize,
+            this.cellSize
+          );
         }
       } else {
         this.ctx.fillStyle = colorMap[this.foodType];
-        this.ctx.fillRect(this.food.x * this.cellSize, this.food.y * this.cellSize, this.cellSize, this.cellSize);
+        this.ctx.fillRect(
+          this.food.x * this.cellSize,
+          this.food.y * this.cellSize,
+          this.cellSize,
+          this.cellSize
+        );
       }
     } else {
       this.ctx.fillStyle = colorMap[this.foodType];
-      this.ctx.fillRect(this.food.x * this.cellSize, this.food.y * this.cellSize, this.cellSize, this.cellSize);
+      this.ctx.fillRect(
+        this.food.x * this.cellSize,
+        this.food.y * this.cellSize,
+        this.cellSize,
+        this.cellSize
+      );
     }
 
-    // obstacles
     this.ctx.fillStyle = '#334155';
     for (const o of this.obstacles) {
-      this.ctx.fillRect(o.x * this.cellSize, o.y * this.cellSize, this.cellSize, this.cellSize);
+      this.ctx.fillRect(
+        o.x * this.cellSize,
+        o.y * this.cellSize,
+        this.cellSize,
+        this.cellSize
+      );
     }
 
-    // snake
     this.ctx.fillStyle = '#111';
     for (const part of this.snake) {
-      this.ctx.fillRect(part.x * this.cellSize, part.y * this.cellSize, this.cellSize, this.cellSize);
+      this.ctx.fillRect(
+        part.x * this.cellSize,
+        part.y * this.cellSize,
+        this.cellSize,
+        this.cellSize
+      );
     }
   }
 
@@ -463,14 +519,44 @@ export class GameChallengeComponent implements AfterViewInit, OnDestroy, OnChang
     this.ctx.save();
     this.ctx.globalAlpha = 0.7;
     this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
+    this.ctx.fillRect(
+      0,
+      0,
+      this.cols * this.cellSize,
+      this.rows * this.cellSize
+    );
     this.ctx.restore();
 
     this.ctx.fillStyle = '#fff';
     this.ctx.textAlign = 'center';
     this.ctx.font = 'bold 24px monospace';
-    this.ctx.fillText('Paused', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2);
+    this.ctx.fillText(
+      'Paused',
+      (this.cols * this.cellSize) / 2,
+      (this.rows * this.cellSize) / 2
+    );
     this.ctx.font = '14px monospace';
-    this.ctx.fillText('Click to resume', (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2 + 28);
+    this.ctx.fillText(
+      'Click to resume',
+      (this.cols * this.cellSize) / 2,
+      (this.rows * this.cellSize) / 2 + 28
+    );
+  }
+
+  private startSecondTimer(seconds: number) {
+    this.timeLeft = Math.max(0, Math.floor(seconds || 0));
+    this.timeLeftChange.emit(this.timeLeft);
+
+    window.clearInterval(this.secondTimerId);
+    this.secondTimerId = window.setInterval(() => {
+      if (this.over || this.paused) return;
+      if (this.timeLeft > 0) {
+        this.timeLeft -= 1;
+        this.timeLeftChange.emit(this.timeLeft);
+        if (this.timeLeft === 0) {
+          this.finishGame(); 
+        }
+      }
+    }, 1000);
   }
 }
