@@ -40,6 +40,14 @@
           <div class="label small">Speed</div>
           <div class="value small">{{ gameSpeed | number : "1.2-2" }}x</div>
         </ng-container>
+
+        <ng-container *ngIf="mode === 'challenge'">
+          <div class="label small">Time</div>
+          <div class="value small">{{ timeLeft }}s</div>
+
+          <div class="label small">Speed</div>
+          <div class="value small">{{ gameSpeed | number : "1.2-2" }}x</div>
+        </ng-container>
       </aside>
 
       <app-game-classic
@@ -101,6 +109,12 @@
         <span class="sep" aria-hidden="true">&nbsp;•&nbsp;</span>
         <span class="muted">Obstacles:</span>
         <span class="pill">{{ speedSettings.obstaclesOn ? "On" : "Off" }}</span>
+      </ng-container>
+
+      <ng-container *ngIf="mode === 'challenge'">
+        <span class="sep" aria-hidden="true">&nbsp;•&nbsp;</span>
+        <span class="muted">Walls:</span>
+        <span class="pill">{{ goals?.wallsAllowed ? "On" : "Off" }}</span>
       </ng-container>
     </div>
   </footer>

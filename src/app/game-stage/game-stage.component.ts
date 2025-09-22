@@ -19,6 +19,13 @@ import {
 import { HowToPlayComponent } from '../how-to-play/how-to-play.component';
 import { GameChallengeComponent } from '../game-play/game-challenge/game-challenge.component';
 
+interface ChallengeGoals {
+  targetFruits: number;
+  targetTime: number;
+  powerUpsOn: boolean;
+  wallsAllowed: boolean;
+}
+
 @Component({
   selector: 'app-game-stage',
   standalone: true,
@@ -59,6 +66,8 @@ export class GameStageComponent implements OnInit {
     startingLength: 5,
   };
 
+  goals: ChallengeGoals | null = null;
+
   timeLeft = 0;
 
   @ViewChild(GameClassicComponent) classicRef?: GameClassicComponent;
@@ -77,6 +86,9 @@ export class GameStageComponent implements OnInit {
     this.mode = st?.mode ?? this.mode ?? null;
     this.settings = st?.settings ?? this.settings ?? null;
 
+    // 👇 nou: citește goals din state (trimise din ChallengeMode)
+    this.goals = st?.goals ?? this.goals ?? null;
+
     const s = st?.speedSettings as Partial<SpeedModeSettings> | undefined;
     if (s) this.speedSettings = { ...this.speedSettings, ...s };
 
@@ -93,6 +105,11 @@ export class GameStageComponent implements OnInit {
 
     if (this.mode === 'speed') {
       this.timeLeft = this.speedSettings.timeAttackSec ?? 0;
+    }
+
+    // 👇 nou: setează timpul inițial și pentru challenge
+    if (this.mode === 'challenge') {
+      this.timeLeft = this.goals?.targetTime ?? 0;
     }
   }
 
@@ -133,6 +150,10 @@ export class GameStageComponent implements OnInit {
     this.score = 0;
     if (this.mode === 'speed')
       this.timeLeft = this.speedSettings.timeAttackSec || 0;
+
+    if (this.mode === 'challenge') {
+      this.timeLeft = this.goals?.targetTime || 0;
+    }
   }
 
   onClickPauseToggle() {
