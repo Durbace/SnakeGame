@@ -1,6 +1,14 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
+export interface ClassicSettings {
+  gridSize: number;
+  wrapEdges: boolean;
+  startingLength: number;
+  startingSpeed: number;
+}
 
 @Component({
   selector: 'app-challenge-mode',
@@ -13,22 +21,42 @@ import { FormsModule } from '@angular/forms';
 export class ChallengeModeComponent {
   targetFruits = 10;
   targetTime = 90;
-  powerUpsOn = true;
   wallsAllowed = false;
 
+  gridSize = 24;
+  wrapEdges = false;
+  startingLength = 4;
+  startingSpeed = 5;
+
   showSettings = false;
+
+  constructor(private router: Router) {}
 
   onNext() {
     this.showSettings = true;
   }
 
   onStartChallenge() {
-    console.log('[Challenge] Start with:', {
+    const settings: ClassicSettings = {
+      gridSize: this.gridSize,
+      wrapEdges: this.wrapEdges,
+      startingLength: this.startingLength,
+      startingSpeed: this.startingSpeed,
+    };
+
+    const goals = {
       targetFruits: this.targetFruits,
       targetTime: this.targetTime,
-      powerUpsOn: this.powerUpsOn,
       wallsAllowed: this.wallsAllowed,
+    };
+
+    this.router.navigateByUrl('/play', {
+      state: { mode: 'challenge', settings, goals },
     });
+  }
+
+  clampGrid() {
+    this.gridSize = Math.min(60, Math.max(10, Math.floor(this.gridSize || 24)));
   }
 
   get isInSettings(): boolean {
@@ -43,4 +71,3 @@ export class ChallengeModeComponent {
     return `${'★'.repeat(s)}${'☆'.repeat(3 - s)}`;
   }
 }
-

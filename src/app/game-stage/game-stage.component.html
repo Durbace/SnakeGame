@@ -71,6 +71,20 @@
         (resumeRequested)="handleResumeRequested()"
       ></app-game-speed>
 
+      <app-game-challenge
+        *ngIf="mode === 'challenge'"
+        [mode]="mode"
+        [paused]="paused"
+        [gameSpeed]="gameSpeed"
+        [classicSettings]="settings"
+        (scoreChange)="handleScoreChange($event)"
+        (highScoreChange)="handleHighScoreChange($event)"
+        (speedChange)="handleSpeedChange($event)"
+        (gameOver)="handleGameOver()"
+        (requestRestart)="handleRequestedRestart()"
+        (resumeRequested)="handleResumeRequested()"
+      ></app-game-challenge>
+
       <aside class="score-side right">
         <div class="label">High<br />Score</div>
         <div class="value">{{ highScore }}</div>

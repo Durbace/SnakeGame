@@ -1,25 +1,25 @@
-<section class="challenge" *ngIf="!showSettings">
-  <h2 class="challenge-title">Challenge Mode</h2>
-  <p class="challenge-lead">
-    Short missions with clear objectives. Finish levels fast, earn stars, and
-    climb the ladder.
+<!-- Ecran Rules / Intro -->
+<section class="classic" *ngIf="!showSettings">
+  <h2 class="classic-title">Challenge Mode</h2>
+  <p class="classic-lead">
+    Short missions with clear objectives. Finish levels fast, earn stars, and climb the ladder.
   </p>
 
-  <div class="challenge-card">
-    <div class="challenge-grid">
-      <div class="challenge-left">
-        <h3>Objectives</h3>
+  <div class="classic-card">
+    <div class="classic-grid">
+      <div class="classic-left">
+        <h3>Rules</h3>
         <ul class="rules">
           <li>
             <span class="dot"></span>
             <span class="text">
-              Collect <strong>{{ targetFruits }}</strong>&nbsp;fruits.
+              Collect <strong>{{ targetFruits }}</strong> fruits before time runs out.
             </span>
           </li>
           <li>
             <span class="dot"></span>
             <span class="text">
-              Survive for <strong>{{ targetTime }}</strong>&nbsp;seconds.
+              Survive for <strong>{{ targetTime }}</strong> seconds to secure extra stars.
             </span>
           </li>
           <li>
@@ -30,38 +30,100 @@
               <em *ngIf="wallsAllowed">(walls allowed)</em>.
             </span>
           </li>
+          <li>
+            <span class="dot"></span>
+            <span class="text">
+              Use <span class="kbd">Arrow Keys</span> or <span class="kbd">WASD</span>.
+            </span>
+          </li>
         </ul>
-        <div class="star-hint">Target stars: {{ starHint }}</div>
       </div>
 
-      <div class="challenge-right" aria-hidden="true">
+      <div class="classic-right" aria-hidden="true">
         <div class="preview">
-          <img src="assets/challenge-preview.svg" alt="Challenge preview" />
+          <div class="grid">
+            <span class="cell snake"></span>
+            <span class="cell snake"></span>
+            <span class="cell snake head"></span>
+            <span class="cell fruit"></span>
+          </div>
         </div>
+        <div class="hint star-hint">Target stars: {{ starHint }}</div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="challenge" *ngIf="showSettings">
-  <h2 class="challenge-title">Challenge Settings</h2>
-  <p class="challenge-lead">Tune objectives and constraints for this run.</p>
+<!-- Ecran Settings -->
+<section class="classic" *ngIf="showSettings">
+  <h2 class="classic-title">Challenge Settings</h2>
+  <p class="classic-lead">
+    Height is fixed to 26 rows. Adjust width (columns) and mission goals.
+  </p>
 
-  <div class="challenge-card">
-    <div class="challenge-grid">
-      <div class="challenge-left">
+  <div class="classic-card">
+    <div class="classic-grid">
+      <div class="classic-left">
         <h3>Settings</h3>
 
         <div class="options">
+          <!-- Grid / Start (ca la Classic) -->
+          <label class="opt">
+            <span>Columns (width)</span>
+            <div class="range-wrap">
+              <input
+                class="range" type="range"
+                min="10" max="60" step="1"
+                [(ngModel)]="gridSize"
+                aria-label="Columns (width)"
+                (input)="clampGrid()"
+              />
+              <span class="range-value">{{ gridSize }} × 26</span>
+            </div>
+          </label>
+
+          <label class="opt">
+            <span>Starting Length</span>
+            <div class="range-wrap">
+              <input
+                class="range" type="range"
+                min="1" max="10" step="1"
+                [(ngModel)]="startingLength"
+                aria-label="Starting length"
+              />
+              <span class="range-value">{{ startingLength }}</span>
+            </div>
+          </label>
+
+          <label class="opt">
+            <span>Starting Speed</span>
+            <div class="range-wrap">
+              <input
+                class="range" type="range"
+                min="1" max="10" step="1"
+                [(ngModel)]="startingSpeed"
+                aria-label="Starting speed"
+              />
+              <span class="range-value">{{ startingSpeed }}</span>
+            </div>
+          </label>
+
+          <label class="opt row">
+            <span>Wrap Edges</span>
+            <label class="switch small">
+              <input type="checkbox" [(ngModel)]="wrapEdges" aria-label="Wrap edges" />
+              <span class="slider"></span>
+            </label>
+          </label>
+
+          <!-- Mission goals -->
           <label class="opt">
             <span>Target Fruits</span>
             <div class="range-wrap">
               <input
-                class="range"
-                type="range"
+                class="range" type="range"
                 min="5" max="40" step="1"
-                [(ngModel)]="targetFruits"
-                aria-label="Target fruits"
+                [(ngModel)]="targetFruits" aria-label="Target fruits"
               />
               <span class="range-value">{{ targetFruits }}</span>
             </div>
@@ -71,11 +133,9 @@
             <span>Time Limit (sec)</span>
             <div class="range-wrap">
               <input
-                class="range"
-                type="range"
+                class="range" type="range"
                 min="30" max="300" step="10"
-                [(ngModel)]="targetTime"
-                aria-label="Time limit in seconds"
+                [(ngModel)]="targetTime" aria-label="Time limit in seconds"
               />
               <span class="range-value">{{ targetTime }}s</span>
             </div>
@@ -84,34 +144,26 @@
           <label class="opt row">
             <span>Walls Allowed</span>
             <label class="switch small">
-              <input
-                type="checkbox"
-                [(ngModel)]="wallsAllowed"
-                aria-label="Walls allowed"
-              />
-              <span class="slider"></span>
-            </label>
-          </label>
-
-          <label class="opt row">
-            <span>Power-Ups</span>
-            <label class="switch small">
-              <input
-                type="checkbox"
-                [(ngModel)]="powerUpsOn"
-                aria-label="Power-ups on"
-              />
+              <input type="checkbox" [(ngModel)]="wallsAllowed" aria-label="Walls allowed" />
               <span class="slider"></span>
             </label>
           </label>
         </div>
-
-        <div class="star-hint">Estimated stars: {{ starHint }}</div>
       </div>
 
-      <div class="challenge-right" aria-hidden="true">
-        <div class="preview">
-          <img src="assets/challenge-preview.svg" alt="Challenge settings preview" />
+      <div class="classic-right" aria-hidden="true">
+        <div class="preview settings-preview">
+          <div class="grid">
+            <span class="cell snake"></span>
+            <span class="cell snake head"></span>
+            <span class="cell fruit"></span>
+          </div>
+          <div class="hint">
+            Grid: {{ gridSize }}×26 • Speed: {{ startingSpeed }}
+          </div>
+          <div class="hint">
+            Goal: {{ targetFruits }} fruits • {{ targetTime }}s
+          </div>
         </div>
       </div>
     </div>
