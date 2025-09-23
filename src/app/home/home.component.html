@@ -50,7 +50,10 @@
       </ng-container>
 
       <ng-container *ngSwitchCase="'settings'">
-        <app-settings></app-settings>
+        <app-settings
+          [snakeSkin]="snakeSkin"
+          (snakeSkinChange)="onSkinChanged($event)"
+        ></app-settings>
       </ng-container>
 
       <ng-container *ngSwitchCase="'classic'">

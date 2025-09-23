@@ -1,4 +1,3 @@
-<!-- înainte: <div class="game-root" [class.blurred]="showHowTo"> -->
 <div class="game-root">
   <header class="topbar">
     <div class="brand" (click)="onClickHome()">
@@ -8,7 +7,6 @@
 
     <nav class="nav">
       <button class="link" (click)="onClickHome()">Home</button>
-      <!-- eliminat: butonul How to Play + separator -->
       <button class="btn restart" (click)="onClickRestart()">
         <span class="ico-refresh" aria-hidden="true"></span>
         Restart
@@ -61,6 +59,7 @@
         [paused]="paused"
         [gameSpeed]="gameSpeed"
         [classicSettings]="settings"
+        [snakeSkin]="snakeSkin" 
         (scoreChange)="handleScoreChange($event)"
         (highScoreChange)="handleHighScoreChange($event)"
         (speedChange)="handleSpeedChange($event)"
@@ -75,6 +74,7 @@
         [paused]="paused"
         [gameSpeed]="gameSpeed"
         [speedSettings]="speedSettings"
+        [snakeSkin]="snakeSkin" 
         (timeLeftChange)="handleTimeLeftChange($event)"
         (scoreChange)="handleScoreChange($event)"
         (highScoreChange)="handleHighScoreChange($event)"
@@ -92,6 +92,7 @@
         [classicSettings]="settings"
         [timeLimitSec]="goals?.targetTime ?? null"
         [targetFruits]="goals?.targetFruits ?? null"
+         [snakeSkin]="snakeSkin"
         (timeLeftChange)="handleTimeLeftChange($event)"
         (scoreChange)="handleScoreChange($event)"
         (highScoreChange)="handleHighScoreChange($event)"

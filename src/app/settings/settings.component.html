@@ -2,43 +2,116 @@
   <h2 class="settings-title">Settings</h2>
   <p class="settings-lead">Customize your game experience.</p>
 
-  <div class="settings-card">
-    <div class="row">
-      <div class="row-text">
-        <div class="row-title">Sound Effects</div>
-        <div class="row-desc">Enable or disable game sound effects.</div>
+  <div class="settings-grid">
+    <div class="settings-card">
+      <div class="row">
+        <div class="row-text">
+          <div class="row-title">Sound Effects</div>
+          <div class="row-desc">Enable or disable game sound effects.</div>
+        </div>
+        <label class="switch">
+          <input
+            type="checkbox"
+            [checked]="sfxEnabled"
+            (change)="onToggleSfx($event)"
+            aria-label="Toggle sound effects"
+          />
+          <span class="slider"></span>
+        </label>
       </div>
 
-      <label class="switch">
+      <div class="row">
+        <div class="row-text">
+          <div class="row-title">Music Volume</div>
+          <div class="row-desc">Adjust the volume of the game music.</div>
+        </div>
+
+        <div class="range-wrap">
+          <input
+            class="range"
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            [value]="musicVolume"
+            (input)="onChangeMusicVol($event)"
+            aria-label="Music volume"
+          />
+          <span class="range-value">{{ musicVolume }}</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row-text">
+          <div class="row-title">Snake Style</div>
+          <div class="row-desc">Pick how the snake looks.</div>
+        </div>
+        <div class="seg">
+          <select
+            #styleSel
+            class="select"
+            [value]="snakeSkin.style"
+            (change)="onChangeStyle($any($event.target).value)"
+            aria-label="Snake style"
+          >
+            <option value="solid">Solid</option>
+            <option value="stripes">Stripes</option>
+            <option value="gradient">Gradient</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="row-text">
+          <div class="row-title">Base Color</div>
+          <div class="row-desc">Main color of the snake.</div>
+        </div>
         <input
-          type="checkbox"
-          [checked]="sfxEnabled"
-          (change)="onToggleSfx($event)"
-          aria-label="Toggle sound effects"
+          type="color"
+          [value]="snakeSkin.base"
+          (input)="onChangeBase($event)"
+          aria-label="Base color"
         />
-        <span class="slider"></span>
-      </label>
+      </div>
+
+      <div class="row">
+        <div class="row-text">
+          <div class="row-title">Accent Color</div>
+          <div class="row-desc">Secondary color (stripes/gradient).</div>
+        </div>
+        <input
+          type="color"
+          [value]="snakeSkin.accent"
+          (input)="onChangeAccent($event)"
+          aria-label="Accent color"
+        />
+      </div>
+
+      <div class="row" *ngIf="snakeSkin.style === 'stripes'">
+        <div class="row-text">
+          <div class="row-title">Stripe Width</div>
+          <div class="row-desc">Thickness of the stripes.</div>
+        </div>
+        <div class="range-wrap">
+          <input
+            class="range"
+            type="range"
+            min="2"
+            max="16"
+            step="1"
+            [value]="snakeSkin.stripeWidth"
+            (input)="onChangeStripeWidth($event)"
+            aria-label="Stripe width"
+          />
+          <span class="range-value">{{ snakeSkin.stripeWidth }}</span>
+        </div>
+      </div>
     </div>
 
-    <div class="row">
-      <div class="row-text">
-        <div class="row-title">Music Volume</div>
-        <div class="row-desc">Adjust the volume of the game music.</div>
-      </div>
-
-      <div class="range-wrap">
-        <input
-          class="range"
-          type="range"
-          min="0"
-          max="100"
-          step="1"
-          [value]="musicVolume"
-          (input)="onChangeMusicVol($event)"
-          aria-label="Music volume"
-        />
-        <span class="range-value">{{ musicVolume }}</span>
-      </div>
+    <div class="preview-card" aria-hidden="true">
+      <div class="preview-title">Preview</div>
+      <canvas #previewCanvas class="preview-canvas"></canvas>
+      <div class="preview-hint">This is how your snake will look.</div>
     </div>
   </div>
 </section>

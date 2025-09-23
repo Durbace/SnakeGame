@@ -2,12 +2,13 @@ import { Component, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-import { SettingsComponent } from '../settings/settings.component';
+import { SettingsComponent, SnakeSkin } from '../settings/settings.component';
 import { HowToPlayComponent } from '../how-to-play/how-to-play.component';
 import { ClassicModeComponent } from '../game-modes/classic-mode/classic-mode.component';
 import { SpeedModeComponent } from '../game-modes/speed-mode/speed-mode.component';
 import { ChallengeModeComponent } from '../game-modes/challenge-mode/challenge-mode.component';
 import { PlayStartComponent } from '../play-start/play-start.component';
+import { SnakeSkinStore } from '../services/snake-skin.store';
 
 type ModalType =
   | 'play'
@@ -48,6 +49,7 @@ export class HomeComponent {
   isModalOpen = false;
   modalType: ModalType = null;
   modalTitleId = 'modal-title-' + Math.random().toString(36).slice(2, 8);
+  snakeSkin!: SnakeSkin;
 
   private readonly nextSupported = new Set<Exclude<ModalType, null>>([
     'classic',
@@ -55,14 +57,23 @@ export class HomeComponent {
     'challenge',
   ]);
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private skinStore: SnakeSkinStore) {
+    this.snakeSkin = this.skinStore.get();
+  } 
+
+onSkinChanged(s: SnakeSkin) {
+    this.snakeSkin = { ...s };
+    this.skinStore.set(this.snakeSkin);
+  }
 
   private goToPlay(
     mode: 'classic' | 'speed' | 'challenge',
     extraState: Record<string, any> = {}
   ) {
     this.closeModal();
-    this.router.navigate(['/play'], { state: { mode, ...extraState } });
+    this.router.navigate(['/play'], {
+      state: { mode, ...extraState, snakeSkin: this.snakeSkin },
+    });
   }
 
   get modalTitle(): string {

@@ -14,6 +14,12 @@ import {
 type Cell = { x: number; y: number };
 type FruitType = 'normal' | 'toxic' | 'golden' | 'fake';
 type Fruit = { pos: Cell; type: FruitType; expiresAt: number | null };
+type SnakeSkin = {
+  style: 'solid' | 'stripes' | 'gradient';
+  base: string;
+  accent: string;
+  stripeWidth: number;
+};
 
 export interface ChallengeSettings {
   gridSize: number;
@@ -40,8 +46,14 @@ export class GameChallengeComponent
 
   @Input() timeLimitSec: number | null = null;
   @Input() targetFruits: number | null = null;
-  @Output() timeLeftChange = new EventEmitter<number>();
 
+  @Input() snakeSkin: SnakeSkin = {
+  style: 'stripes',
+  base: '#22c55e',
+  accent: '#065f46',
+  stripeWidth: 6,
+};
+  @Output() timeLeftChange = new EventEmitter<number>();
   @Output() scoreChange = new EventEmitter<number>();
   @Output() highScoreChange = new EventEmitter<number>();
   @Output() speedChange = new EventEmitter<number>();
@@ -113,6 +125,9 @@ export class GameChallengeComponent
       this.restartInterval();
       this.speedChange.emit(this.gameSpeed);
     }
+     if (changes['snakeSkin'] && this.viewInited) {
+    this.drawAll();
+  }
   }
 
   ngAfterViewInit(): void {
@@ -238,10 +253,16 @@ export class GameChallengeComponent
     this.drawAll();
     this.restartInterval();
 
+    this.emitInitialStats();
+  }
+
+  private emitInitialStats() {
+  Promise.resolve().then(() => {
     this.scoreChange.emit(this.score);
     this.highScoreChange.emit(this.highScore);
     this.speedChange.emit(this.gameSpeed);
-  }
+  });
+}
 
   private restartInterval() {
     window.clearInterval(this.intervalId);
@@ -530,16 +551,95 @@ export class GameChallengeComponent
       );
     }
 
-    this.ctx.fillStyle = '#111';
-    for (const part of this.snake) {
-      this.ctx.fillRect(
-        part.x * this.cellSize,
-        part.y * this.cellSize,
-        this.cellSize,
-        this.cellSize
-      );
-    }
+    this.drawSnakeOnePiece(this.ctx, this.snake, this.cellSize, this.snakeSkin);
   }
+
+  private drawSnakeOnePiece(
+  ctx: CanvasRenderingContext2D,
+  snakeCells: { x: number; y: number }[],
+  tile: number,
+  skin: SnakeSkin
+) {
+  if (snakeCells.length === 0) return;
+
+  if (snakeCells.length === 1) {
+    ctx.fillStyle =
+      skin.style === 'solid'
+        ? skin.base
+        : skin.style === 'gradient'
+        ? this.linearGradientForRect(ctx, snakeCells[0], tile, skin)
+        : (this.makeStripePattern(ctx, skin) as any);
+    ctx.fillRect(snakeCells[0].x * tile, snakeCells[0].y * tile, tile, tile);
+    return;
+  }
+
+  const pts = snakeCells.map(c => ({
+    x: c.x * tile + tile / 2,
+    y: c.y * tile + tile / 2,
+  }));
+
+  const p0 = pts[0], pN = pts[pts.length - 1];
+  this.setStrokeForSkin(ctx, skin, p0.x, p0.y, pN.x, pN.y);
+
+  ctx.lineWidth = tile;
+  ctx.lineCap   = 'butt';
+  ctx.lineJoin  = 'round'; 
+  ctx.miterLimit = 3;
+
+  const snap = (v: number) => Math.round(v) + 0.5;
+
+  ctx.beginPath();
+  ctx.moveTo(snap(pts[0].x), snap(pts[0].y));
+  for (let i = 1; i < pts.length; i++) {
+    ctx.lineTo(snap(pts[i].x), snap(pts[i].y));
+  }
+  ctx.stroke();
+}
+
+private setStrokeForSkin(
+  ctx: CanvasRenderingContext2D,
+  skin: SnakeSkin,
+  x1: number, y1: number, x2: number, y2: number
+) {
+  if (skin.style === 'solid') {
+    ctx.strokeStyle = skin.base;
+    return;
+  }
+  if (skin.style === 'gradient') {
+    const g = ctx.createLinearGradient(x1, y1, x2, y2);
+    g.addColorStop(0, skin.base);
+    g.addColorStop(1, skin.accent);
+    ctx.strokeStyle = g;
+    return;
+  }
+  ctx.strokeStyle = this.makeStripePattern(ctx, skin);
+}
+
+private makeStripePattern(ctx: CanvasRenderingContext2D, s: SnakeSkin): CanvasPattern {
+  const size = Math.max(4, s.stripeWidth) * 2;
+  const off = document.createElement('canvas');
+  off.width = size; off.height = size;
+  const o = off.getContext('2d')!;
+  o.fillStyle = s.base;
+  o.fillRect(0, 0, size, size);
+  o.strokeStyle = s.accent;
+  o.lineWidth = s.stripeWidth;
+  o.beginPath();
+  o.moveTo(-size, size * 0.6); o.lineTo(size * 2, -size * 0.4);
+  o.moveTo(-size, size * 1.6); o.lineTo(size * 2,  size * 0.6);
+  o.stroke();
+  return ctx.createPattern(off, 'repeat')!;
+}
+
+private linearGradientForRect(
+  ctx: CanvasRenderingContext2D, c: Cell, tile: number, s: SnakeSkin
+) {
+  const x1 = c.x * tile, y1 = c.y * tile;
+  const g = ctx.createLinearGradient(x1, y1, x1 + tile, y1 + tile);
+  g.addColorStop(0, s.base);
+  g.addColorStop(1, s.accent);
+  return g;
+}
 
   public onCanvasClick(): void {
     if (this.over) {
