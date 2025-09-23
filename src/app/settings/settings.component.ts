@@ -14,9 +14,9 @@ import { CommonModule } from '@angular/common';
 
 export type SnakeSkin = {
   style: 'solid' | 'stripes' | 'gradient';
-  base: string; 
-  accent: string; 
-  stripeWidth: number; 
+  base: string;
+  accent: string;
+  stripeWidth: number;
 };
 
 @Component({
@@ -28,6 +28,11 @@ export type SnakeSkin = {
 })
 export class SettingsComponent implements AfterViewInit, OnChanges {
   public Math = Math;
+  private ctx!: CanvasRenderingContext2D;
+  private dpr = 1;
+  private cssW = 0;
+  private cssH = 220;
+
   @Input() sfxEnabled = true;
   @Input() musicVolume = 50;
   @Output() sfxToggled = new EventEmitter<boolean>();
@@ -39,6 +44,7 @@ export class SettingsComponent implements AfterViewInit, OnChanges {
     accent: '#065f46',
     stripeWidth: 6,
   };
+
   @Output() snakeSkinChange = new EventEmitter<SnakeSkin>();
 
   @ViewChild('previewCanvas') previewCanvas!: ElementRef<HTMLCanvasElement>;
@@ -53,10 +59,10 @@ export class SettingsComponent implements AfterViewInit, OnChanges {
   }
 
   onChangeStyle(style: SnakeSkin['style']) {
-  this.snakeSkin = { ...this.snakeSkin, style };
-  this.snakeSkinChange.emit(this.snakeSkin);
-  this.drawPreview();
-}
+    this.snakeSkin = { ...this.snakeSkin, style };
+    this.snakeSkinChange.emit(this.snakeSkin);
+    this.drawPreview();
+  }
 
   onChangeBase(evt: Event) {
     const base = (evt.target as HTMLInputElement).value;
@@ -78,83 +84,92 @@ export class SettingsComponent implements AfterViewInit, OnChanges {
   }
 
   ngAfterViewInit(): void {
+    this.setupCanvas();
     this.drawPreview();
   }
   ngOnChanges(_: SimpleChanges): void {
-    this.drawPreview();
+    if (this.ctx) this.drawPreview();
   }
 
   @HostListener('window:resize')
   onResize() {
+    this.setupCanvas();
     this.drawPreview();
   }
 
-  private getCtx(): CanvasRenderingContext2D | null {
+  private setupCanvas() {
     const canvas = this.previewCanvas?.nativeElement;
-    if (!canvas) return null;
+    if (!canvas) return;
 
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const cssW = canvas.parentElement ? canvas.parentElement.clientWidth : 360;
-    const cssH = 220;
+    this.dpr = Math.max(1, window.devicePixelRatio || 1);
+    this.cssW = canvas.parentElement ? canvas.parentElement.clientWidth : 360;
+    this.cssH = 220;
 
-    canvas.width = Math.floor(cssW * dpr);
-    canvas.height = Math.floor(cssH * dpr);
-    canvas.style.width = cssW + 'px';
-    canvas.style.height = cssH + 'px';
+    canvas.width = Math.floor(this.cssW * this.dpr);
+    canvas.height = Math.floor(this.cssH * this.dpr);
+    canvas.style.width = this.cssW + 'px';
+    canvas.style.height = this.cssH + 'px';
 
-    const ctx = canvas.getContext('2d');
-    if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    return ctx;
+    const ctx = canvas.getContext('2d')!;
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.ctx = ctx;
   }
 
   private drawPreview() {
-  const ctx = this.getCtx();
-  if (!ctx) return;
+    if (!this.ctx) return;
 
-  const canvas = this.previewCanvas.nativeElement;
-  const W = canvas.clientWidth;
-  const H = canvas.clientHeight;
+    const ctx = this.ctx;
+    const W = this.cssW;
+    const H = this.cssH;
 
-  ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#f8fafc';
-  ctx.fillRect(0, 0, W, H);
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, W, H);
 
-  const tile = 18; 
-  const barLen = 140;  
-  const cx = W / 2;
-  const y  = H - 40;  
+    const tile = 18;
+    const barLen = Math.min(W - 40, Math.max(100, Math.floor(W * 0.55)));
+    const cx = Math.floor(W / 2);
+    const cy = Math.floor(H / 2);
 
-  this.applyStroke(ctx, cx - barLen/2, y, cx + barLen/2, y);
+    this.applyStroke(ctx, cx - barLen / 2, cy, cx + barLen / 2, cy);
 
-  ctx.lineWidth = tile;
-  ctx.lineCap = 'butt';
-  ctx.lineJoin = 'bevel';
+    ctx.lineWidth = tile;
+    ctx.lineCap = 'butt';
+    ctx.lineJoin = 'bevel';
 
-  ctx.beginPath();
-  ctx.moveTo(cx - barLen/2, y);
-  ctx.lineTo(cx + barLen/2, y);
-  ctx.stroke();
-}
+    const snap = (v: number) => Math.round(v) + 0.5;
 
-private applyStroke(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) {
-  const s = this.snakeSkin;
-
-  if (s.style === 'solid') {
-    ctx.strokeStyle = s.base;
-    return;
+    ctx.beginPath();
+    ctx.moveTo(snap(cx - barLen / 2), snap(cy));
+    ctx.lineTo(snap(cx + barLen / 2), snap(cy));
+    ctx.stroke();
   }
 
-  if (s.style === 'gradient') {
-    const g = ctx.createLinearGradient(x1, y1, x2, y2);
-    g.addColorStop(0, s.base);
-    g.addColorStop(1, s.accent);
-    ctx.strokeStyle = g;
-    return;
-  }
+  private applyStroke(
+    ctx: CanvasRenderingContext2D,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ) {
+    const s = this.snakeSkin;
 
-  const pattern = this.makeStripePattern(ctx, s);
-  ctx.strokeStyle = pattern;
-}
+    if (s.style === 'solid') {
+      ctx.strokeStyle = s.base;
+      return;
+    }
+
+    if (s.style === 'gradient') {
+      const g = ctx.createLinearGradient(x1, y1, x2, y2);
+      g.addColorStop(0, s.base);
+      g.addColorStop(1, s.accent);
+      ctx.strokeStyle = g;
+      return;
+    }
+
+    const pattern = this.makeStripePattern(ctx, s);
+    ctx.strokeStyle = pattern;
+  }
 
   private drawHead(
     ctx: CanvasRenderingContext2D,
@@ -165,7 +180,7 @@ private applyStroke(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: n
   ) {
     ctx.save();
     this.applyFill(ctx);
-    ctx.fillRect(x, y, tile, tile); 
+    ctx.fillRect(x, y, tile, tile);
 
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(x + tile * 0.7, y + tile * 0.25, 3, 3);
@@ -183,7 +198,7 @@ private applyStroke(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: n
   ) {
     ctx.save();
     this.applyFill(ctx);
-    ctx.fillRect(x, y, tile, tile); 
+    ctx.fillRect(x, y, tile, tile);
     ctx.restore();
   }
 
@@ -195,7 +210,7 @@ private applyStroke(ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: n
   ) {
     ctx.save();
     this.applyFill(ctx);
-    ctx.fillRect(x, y, tile, tile); 
+    ctx.fillRect(x, y, tile, tile);
     ctx.restore();
   }
 

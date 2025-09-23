@@ -176,6 +176,7 @@
   font-weight: 800;
   color: #0f172a;
   margin-bottom: 6px;
+  text-align: center;
 }
 .preview-canvas {
   width: 100%;
@@ -189,4 +190,5 @@
   margin-top: 8px;
   font-size: 12px;
   color: #64748b;
+  text-align: center;
 }
