@@ -23,11 +23,15 @@ import { SnakeSkinStore } from '../services/snake-skin.store';
 import { SfxService } from '../services/sfx.service';
 import { SettingsComponent } from '../settings/settings.component';
 
+import { HighScoreStore } from '../services/high-score.store';
+import { PrefsStore } from '../services/prefs.store';
+import { Subscription } from 'rxjs';
+
 interface ChallengeGoals {
   targetFruits: number;
   targetTime: number;
-  powerUpsOn: boolean;
   wallsAllowed: boolean;
+  powerUpsOn?: boolean;
 }
 
 @Component({
@@ -86,12 +90,19 @@ export class GameStageComponent implements OnInit, OnDestroy {
   @ViewChild(GameSpeedComponent) speedRef?: GameSpeedComponent;
   @ViewChild(GameChallengeComponent) challengeRef?: GameChallengeComponent;
 
+  private skinSub?: Subscription;
+
   constructor(
     private router: Router,
     private skinStore: SnakeSkinStore,
-    private sfx: SfxService
+    private sfx: SfxService,
+    private hs: HighScoreStore,
+    private prefs: PrefsStore
   ) {
     this.snakeSkin = this.skinStore.get();
+    this.skinSub = this.skinStore.skin$.subscribe((s) => {
+      this.snakeSkin = s;
+    });
   }
 
   private unlockMusic = () => {
@@ -102,17 +113,45 @@ export class GameStageComponent implements OnInit, OnDestroy {
     const st =
       this.router.getCurrentNavigation()?.extras?.state ?? window.history.state;
 
-    this.mode = st?.mode ?? this.mode ?? null;
+    this.mode = st?.mode ?? this.prefs.getLastMode() ?? this.mode ?? null;
+
     this.settings = st?.settings ?? this.settings ?? null;
     this.goals = st?.goals ?? this.goals ?? null;
-    this.sfxEnabledUi = this.sfx.getEnabled();
-    this.musicVolumeUi = Math.round(this.sfx.getMusicVolume() * 100);
 
-    const incoming = st?.snakeSkin as SnakeSkin | undefined;
-    this.snakeSkin = incoming ?? this.skinStore.get();
+    const incomingSpeed = st?.speedSettings as
+      | Partial<SpeedModeSettings>
+      | undefined;
+    if (incomingSpeed) {
+      this.speedSettings = { ...this.speedSettings, ...incomingSpeed };
+    }
 
-    const s = st?.speedSettings as Partial<SpeedModeSettings> | undefined;
-    if (s) this.speedSettings = { ...this.speedSettings, ...s };
+    if (!this.settings && this.mode === 'classic') {
+      const savedClassic = this.prefs.getClassic();
+      if (savedClassic) this.settings = savedClassic;
+    }
+    if (this.mode === 'speed' && !incomingSpeed) {
+      const savedSpeed = this.prefs.getSpeed();
+      if (savedSpeed)
+        this.speedSettings = { ...this.speedSettings, ...savedSpeed };
+    }
+    if (this.mode === 'challenge' && (!this.settings || !this.goals)) {
+      const savedChallenge = this.prefs.getChallenge();
+      if (savedChallenge) {
+        this.settings = savedChallenge.settings;
+        this.goals = savedChallenge.goals;
+      }
+    }
+
+    const audio = this.prefs.getAudio();
+    this.sfxEnabledUi = audio.sfxEnabled;
+    this.musicVolumeUi = audio.musicVolume;
+    this.sfx.setEnabled(this.sfxEnabledUi);
+    this.sfx.setMusicVolume(this.musicVolumeUi / 100);
+    this.snakeSkin = this.skinStore.get();
+
+    if (this.mode) {
+      this.highScore = this.hs.get(this.mode);
+    }
 
     if (this.mode === 'speed')
       this.timeLeft = this.speedSettings.timeAttackSec ?? 0;
@@ -120,7 +159,6 @@ export class GameStageComponent implements OnInit, OnDestroy {
       this.timeLeft = this.goals?.targetTime ?? 0;
       this.fruitsRemaining = this.goals?.targetFruits ?? null;
     }
-    this.sfx.startMusic();
 
     window.addEventListener('pointerdown', this.unlockMusic, {
       once: true,
@@ -141,13 +179,17 @@ export class GameStageComponent implements OnInit, OnDestroy {
       (this.mode === 'speed'
         ? this.speedSettings?.startingSpeed
         : this.settings?.startingSpeed) ?? this.gameSpeed;
-
     this.gameSpeed = initialSpeed;
+
+    this.sfx.startMusic();
   }
 
   ngOnDestroy() {
-    this.sfx.stopMusic();
+    this.skinSub?.unsubscribe();
+    this.persistCurrentModeSettings();
+    this.persistAudioPrefs();
 
+    this.sfx.stopMusic();
     window.removeEventListener('pointerdown', this.unlockMusic, true as any);
     window.removeEventListener('keydown', this.unlockMusic, true as any);
     window.removeEventListener('touchstart', this.unlockMusic, true as any);
@@ -162,8 +204,11 @@ export class GameStageComponent implements OnInit, OnDestroy {
   onClickHome() {
     this.sfx.playButton();
     this.sfx.stopMusic();
+    this.persistCurrentModeSettings();
+    this.persistAudioPrefs();
     this.router.navigate(['/']);
   }
+
   onClickRestart() {
     this.sfx.playButton();
     this.paused = false;
@@ -179,6 +224,8 @@ export class GameStageComponent implements OnInit, OnDestroy {
       this.timeLeft = this.goals?.targetTime || 0;
       this.fruitsRemaining = this.goals?.targetFruits ?? null;
     }
+
+    this.persistCurrentModeSettings();
   }
 
   onClickPauseToggle() {
@@ -191,17 +238,20 @@ export class GameStageComponent implements OnInit, OnDestroy {
   }
 
   handleScoreChange(val: number) {
-    const prev = this.score;
     this.score = val;
-
-    if (this.mode !== 'challenge' && this.score > this.highScore) {
+    if (this.mode && this.mode !== 'challenge' && this.score > this.highScore) {
       this.highScore = this.score;
+      this.hs.set(this.mode, this.highScore);
     }
   }
 
   handleHighScoreChange(val: number) {
-    this.highScore = val;
+    if (val > this.highScore) {
+      this.highScore = val;
+      if (this.mode) this.hs.set(this.mode, val);
+    }
   }
+
   handleSpeedChange(val: number) {
     this.gameSpeed = val;
   }
@@ -210,6 +260,7 @@ export class GameStageComponent implements OnInit, OnDestroy {
     this.sfx.playLose();
     this.paused = true;
     this.activeGame()?.setPaused(true);
+    this.persistCurrentModeSettings();
   }
 
   handleRequestedRestart() {
@@ -269,6 +320,7 @@ export class GameStageComponent implements OnInit, OnDestroy {
     this.activeGame()?.setPaused(true);
     this.sfx.pauseMusic();
   }
+
   closeSettings() {
     this.sfx.playButton();
     this.isSettingsOpen = false;
@@ -278,6 +330,9 @@ export class GameStageComponent implements OnInit, OnDestroy {
     (this.activeGame() as any)?.showPauseOverlay?.();
 
     this.sfx.pauseMusic();
+
+    this.persistCurrentModeSettings();
+    this.persistAudioPrefs();
   }
 
   onSettingsOverlayClick(e: MouseEvent) {
@@ -287,14 +342,70 @@ export class GameStageComponent implements OnInit, OnDestroy {
   onSettingsSfxToggled(enabled: boolean) {
     this.sfxEnabledUi = enabled;
     this.sfx.setEnabled(enabled);
+    this.persistAudioPrefs();
   }
+
   onSettingsMusicChanged(vol: number) {
     this.musicVolumeUi = vol;
     this.sfx.setMusicVolume(vol / 100);
+    this.persistAudioPrefs();
   }
 
   @HostListener('document:keydown.escape')
   onEsc() {
     if (this.isSettingsOpen) this.closeSettings();
+  }
+
+  private persistAudioPrefs() {
+    try {
+      this.prefs.setAudio({
+        sfxEnabled: this.sfxEnabledUi,
+        musicVolume: this.musicVolumeUi,
+      });
+    } catch {}
+  }
+
+  private persistCurrentModeSettings() {
+    try {
+      if (this.mode === 'classic' && this.settings) {
+        this.prefs.setClassic({
+          gridSize: this.settings.gridSize,
+          wrapEdges: !!this.settings.wrapEdges,
+          startingLength: this.settings.startingLength,
+          startingSpeed: this.settings.startingSpeed,
+        });
+      }
+
+      if (this.mode === 'speed') {
+        const s = this.speedSettings;
+        this.prefs.setSpeed({
+          startingSpeed: s.startingSpeed ?? 5,
+          accelRate: s.accelRate ?? 1.0,
+          timeAttackSec: s.timeAttackSec ?? 120,
+          obstaclesOn: !!s.obstaclesOn,
+          obstaclePreset: (s as any).obstaclePreset,
+          obstacleDensity: (s as any).obstacleDensity,
+          gridSize: s.gridSize ?? 20,
+          wrapEdges: s.wrapEdges ?? false,
+          startingLength: s.startingLength ?? 5,
+        });
+      }
+
+      if (this.mode === 'challenge' && this.settings && this.goals) {
+        this.prefs.setChallenge({
+          settings: {
+            gridSize: this.settings.gridSize,
+            wrapEdges: !!this.settings.wrapEdges,
+            startingLength: this.settings.startingLength,
+            startingSpeed: this.settings.startingSpeed,
+          },
+          goals: {
+            targetFruits: this.goals.targetFruits,
+            targetTime: this.goals.targetTime,
+            wallsAllowed: this.goals.wallsAllowed,
+          },
+        });
+      }
+    } catch {}
   }
 }

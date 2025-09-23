@@ -63,7 +63,7 @@ export class GameClassicComponent
   canvasRef!: ElementRef<HTMLCanvasElement>;
 
   score = 0;
-  private highScore = 0;
+  @Input() highScore = 0;
 
   readonly cellSize = 20;
   readonly fixedRows = 26;

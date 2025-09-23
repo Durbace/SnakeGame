@@ -11,6 +11,7 @@ import { PlayStartComponent } from '../play-start/play-start.component';
 import { SnakeSkinStore } from '../services/snake-skin.store';
 import { SfxService } from '../services/sfx.service';
 import { Subscription } from 'rxjs';
+import { PrefsStore } from '../services/prefs.store';
 
 type ModalType =
   | 'play'
@@ -64,60 +65,104 @@ export class HomeComponent {
   private skinSub?: Subscription;
 
   constructor(
-  private router: Router,
-  private skinStore: SnakeSkinStore,
-  private sfx: SfxService
-) {
-  this.snakeSkin = this.skinStore.get();
+    private router: Router,
+    private skinStore: SnakeSkinStore,
+    private sfx: SfxService,
+    private prefs: PrefsStore
+  ) {
+    this.snakeSkin = this.skinStore.get();
+    this.skinSub = this.skinStore.skin$.subscribe((s) => {
+      this.snakeSkin = s;
+    });
 
-  this.skinSub = this.skinStore.skin$.subscribe(s => {
-    this.snakeSkin = s;
-  });
-
-  if ((this.sfx as any).getEnabled) {
-    this.sfxEnabled = this.sfx.getEnabled();
+    const a = this.prefs.getAudio();
+    this.sfxEnabled = a.sfxEnabled;
+    this.musicVolume = a.musicVolume;
+    this.sfx.setEnabled(this.sfxEnabled);
+    this.sfx.setMusicVolume(this.musicVolume / 100);
   }
-  if ((this.sfx as any).getMusicVolume) {
-    this.musicVolume = Math.round(this.sfx.getMusicVolume() * 100);
-  }
-}
 
-ngOnDestroy() {
-  this.skinSub?.unsubscribe();
-}
+  ngOnDestroy() {
+    this.skinSub?.unsubscribe();
+  }
 
   onSkinChanged(s: SnakeSkin) {
-  this.skinStore.set(s);
-  this.snakeSkin = { ...s }; 
-}
+    this.skinStore.set(s);
+    this.snakeSkin = { ...s };
+  }
 
   private goToPlay(
-  mode: 'classic' | 'speed' | 'challenge',
-  extraState: Record<string, any> = {}
-) {
-  this.sfx.playButton();
-  this.closeModal();
+    mode: 'classic' | 'speed' | 'challenge',
+    extraState: Record<string, any> = {}
+  ) {
+    this.sfx.playButton();
+    this.closeModal();
 
-  const skin = this.skinStore.get(); 
-  this.router.navigate(['/play'], {
-    state: { mode, ...extraState, snakeSkin: skin },
-  });
-}
+    if (mode === 'classic' && this.classicRef?.isInSettings) {
+      this.prefs.setClassic({
+        gridSize: this.classicRef.gridSize,
+        wrapEdges: this.classicRef.wrapEdges,
+        startingLength: this.classicRef.startingLength,
+        startingSpeed: this.classicRef.startingSpeed,
+      });
+    }
+    if (mode === 'speed' && this.speedRef?.isInSettings) {
+      const startingSpeedVal =
+        typeof (this.speedRef as any)?.startingSpeed === 'number'
+          ? (this.speedRef as any).startingSpeed
+          : typeof (this.speedRef as any)?.onStartSpeed === 'number'
+          ? (this.speedRef as any).onStartSpeed
+          : 5;
 
+      this.prefs.setSpeed({
+        startingSpeed: startingSpeedVal,
+        accelRate: this.speedRef.accelRate,
+        timeAttackSec: this.speedRef.timeAttack,
+        obstaclesOn: this.speedRef.obstaclesOn,
+        obstaclePreset: this.speedRef.obstaclePreset,
+        obstacleDensity: this.speedRef.obstaclesOn
+          ? this.speedRef.obstacleDensity
+          : undefined,
+        gridSize: this.speedRef.gridSize,
+        wrapEdges: this.speedRef.wrapEdges,
+        startingLength: this.speedRef.startingLength,
+      });
+    }
 
-    onToggleSfx(enabled: boolean) {
+    if (mode === 'challenge' && this.challengeRef?.isInSettings) {
+      this.prefs.setChallenge({
+        settings: {
+          gridSize: this.challengeRef.gridSize,
+          wrapEdges: this.challengeRef.wrapEdges,
+          startingLength: this.challengeRef.startingLength,
+          startingSpeed: this.challengeRef.startingSpeed,
+        },
+        goals: {
+          targetFruits: this.challengeRef.targetFruits,
+          targetTime: this.challengeRef.targetTime,
+          wallsAllowed: this.challengeRef.wallsAllowed,
+        },
+      });
+    }
+
+    this.prefs.setLastMode(mode);
+
+    this.router.navigate(['/play'], {
+      state: { mode, ...extraState },
+    });
+  }
+
+  onToggleSfx(enabled: boolean) {
     this.sfxEnabled = enabled;
     this.sfx.setEnabled(enabled);
-    // opțional: persistă în localStorage dacă vrei să țină peste refresh
-    // localStorage.setItem('sfxEnabled', JSON.stringify(enabled));
+    this.prefs.setAudio({ sfxEnabled: enabled, musicVolume: this.musicVolume });
   }
 
   onMusicVolChanged(vol: number) {
-    this.musicVolume = vol; 
+    this.musicVolume = vol;
     this.sfx.setMusicVolume(vol / 100);
-    // localStorage.setItem('musicVolume', String(vol));
+    this.prefs.setAudio({ sfxEnabled: this.sfxEnabled, musicVolume: vol });
   }
-
 
   get modalTitle(): string {
     switch (this.modalType) {

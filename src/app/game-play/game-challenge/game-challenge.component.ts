@@ -327,7 +327,7 @@ export class GameChallengeComponent
           break;
         case 'golden':
           this.incrementScore(3);
-          delta = 3; // ⬅️ important
+          delta = 3;
           break;
         case 'fake':
           this.addObstacles(this.FAKE_OBSTACLES_ON_PICKUP);
@@ -336,7 +336,7 @@ export class GameChallengeComponent
       }
 
       if (delta > 0) {
-        this.fruitsCollected += delta; // ⬅️ adună punctele
+        this.fruitsCollected += delta; 
         this.fruitsCollectedChange.emit(this.fruitsCollected);
 
         const target = Math.max(0, this.targetFruits ?? 0);
