@@ -197,10 +197,6 @@ export class GameStageComponent implements OnInit, OnDestroy {
     if (this.mode !== 'challenge' && this.score > this.highScore) {
       this.highScore = this.score;
     }
-    if (this.mode === 'challenge' && this.goals?.targetFruits != null) {
-      const total = this.goals.targetFruits;
-      this.fruitsRemaining = Math.max(0, total - this.score);
-    }
   }
 
   handleHighScoreChange(val: number) {
@@ -227,6 +223,11 @@ export class GameStageComponent implements OnInit, OnDestroy {
 
   handleTimeLeftChange(sec: number) {
     this.timeLeft = sec;
+  }
+
+  handleFruitsCollectedChange(val: number) {
+    const total = this.goals?.targetFruits ?? null;
+    this.fruitsRemaining = total != null ? Math.max(0, total - val) : null;
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -269,15 +270,15 @@ export class GameStageComponent implements OnInit, OnDestroy {
     this.sfx.pauseMusic();
   }
   closeSettings() {
-  this.sfx.playButton();
-  this.isSettingsOpen = false;
+    this.sfx.playButton();
+    this.isSettingsOpen = false;
 
-  this.paused = true;
-  this.activeGame()?.setPaused(true);
-  (this.activeGame() as any)?.showPauseOverlay?.();
+    this.paused = true;
+    this.activeGame()?.setPaused(true);
+    (this.activeGame() as any)?.showPauseOverlay?.();
 
-  this.sfx.pauseMusic();
-}
+    this.sfx.pauseMusic();
+  }
 
   onSettingsOverlayClick(e: MouseEvent) {
     if (e.target === e.currentTarget) this.closeSettings();
@@ -288,8 +289,8 @@ export class GameStageComponent implements OnInit, OnDestroy {
     this.sfx.setEnabled(enabled);
   }
   onSettingsMusicChanged(vol: number) {
-    this.musicVolumeUi = vol; 
-    this.sfx.setMusicVolume(vol / 100); 
+    this.musicVolumeUi = vol;
+    this.sfx.setMusicVolume(vol / 100);
   }
 
   @HostListener('document:keydown.escape')

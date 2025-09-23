@@ -62,6 +62,7 @@ export class GameChallengeComponent
   @Output() gameOver = new EventEmitter<void>();
   @Output() requestRestart = new EventEmitter<void>();
   @Output() resumeRequested = new EventEmitter<void>();
+  @Output() fruitsCollectedChange = new EventEmitter<number>();
 
   @ViewChild('screen', { static: false })
   canvasRef!: ElementRef<HTMLCanvasElement>;
@@ -242,6 +243,7 @@ export class GameChallengeComponent
     this.obstacles = [];
     this.foods = [];
     this.fruitsCollected = 0;
+    this.fruitsCollectedChange.emit(this.fruitsCollected);
 
     this.desiredFoods = this.rollDesiredFoods();
     this.adjustFruitsToDesired();
@@ -313,25 +315,41 @@ export class GameChallengeComponent
 
       let counted = false;
 
+      let delta = 0;
       switch (f.type) {
         case 'normal':
           this.incrementScore(1);
-          counted = true;
+          delta = 1;
           break;
         case 'toxic':
           this.shrinkSnake(1);
+          delta = 0;
           break;
         case 'golden':
           this.incrementScore(3);
-          counted = true;
+          delta = 3; // ⬅️ important
           break;
         case 'fake':
           this.addObstacles(this.FAKE_OBSTACLES_ON_PICKUP);
+          delta = 0;
           break;
+      }
+
+      if (delta > 0) {
+        this.fruitsCollected += delta; // ⬅️ adună punctele
+        this.fruitsCollectedChange.emit(this.fruitsCollected);
+
+        const target = Math.max(0, this.targetFruits ?? 0);
+        if (target > 0 && this.fruitsCollected >= target) {
+          this.finishGame('win');
+          return;
+        }
       }
 
       if (counted) {
         this.fruitsCollected++;
+        this.fruitsCollectedChange.emit(this.fruitsCollected);
+
         const target = Math.max(0, this.targetFruits ?? 0);
         if (target > 0 && this.fruitsCollected >= target) {
           this.finishGame('win');
