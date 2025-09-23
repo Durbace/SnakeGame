@@ -93,22 +93,6 @@
           </label>
 
           <label class="opt">
-            <span>Starting Speed</span>
-            <div class="range-wrap">
-              <input
-                class="range"
-                type="range"
-                min="1"
-                max="10"
-                step="1"
-                [(ngModel)]="speedStart"
-                aria-label="Starting speed"
-              />
-              <span class="range-value">{{ speedStart }}</span>
-            </div>
-          </label>
-
-          <label class="opt">
             <span>Acceleration per fruit</span>
             <div class="range-wrap">
               <input
@@ -206,8 +190,8 @@
         <div class="preview">
           <img src="assets/speed-preview.svg" alt="Speed preview" />
           <div class="hint">
-            Grid: {{ gridSize }}×26 • Start: {{ speedStart }} • Accel:
-            {{ accelRate }} • {{ timeAttack }}s
+            Grid: {{ gridSize }}×26 • Accel:
+            {{ accelRate }} • {{ timeAttack }}
           </div>
         </div>
       </div>

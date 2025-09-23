@@ -144,7 +144,6 @@ export class HomeComponent {
       if (this.speedRef.isInSettings) {
         this.goToPlay('speed', {
           speedSettings: {
-            startingSpeed: this.speedRef.speedStart,
             accelRate: this.speedRef.accelRate,
             timeAttackSec: this.speedRef.timeAttack,
             obstaclesOn: this.speedRef.obstaclesOn,

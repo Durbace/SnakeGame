@@ -26,7 +26,6 @@ export class SpeedModeComponent {
   gridSize = 24;
   wrapEdges = false;
   startingLength = 5;
-  speedStart = 5;
   accelRate = 1.0;
   timeAttack = 120;
 
@@ -52,7 +51,6 @@ export class SpeedModeComponent {
       state: {
         mode: 'speed',
         speedSettings: {
-          startingSpeed: this.speedStart,
           accelRate: this.accelRate,
           timeAttackSec: this.timeAttack,
           obstaclesOn: this.obstaclesOn,

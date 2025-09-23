@@ -30,23 +30,31 @@
   <main class="play-wrap">
     <div class="play-layout">
       <aside class="score-side left">
-        <div class="label">Score</div>
-        <div class="value">{{ score }}</div>
+        <div class="stat">
+          <div class="label">Score</div>
+          <div class="value">{{ score }}</div>
+        </div>
 
         <ng-container *ngIf="mode === 'speed'">
-          <div class="label small">Time</div>
-          <div class="value small">{{ timeLeft }}s</div>
-
-          <div class="label small">Speed</div>
-          <div class="value small">{{ gameSpeed | number : "1.2-2" }}x</div>
+          <div class="stat">
+            <div class="label small">Time</div>
+            <div class="value small">{{ timeLeft }}s</div>
+          </div>
+          <div class="stat">
+            <div class="label small">Speed</div>
+            <div class="value small">{{ gameSpeed | number : "1.2-2" }}x</div>
+          </div>
         </ng-container>
 
         <ng-container *ngIf="mode === 'challenge'">
-          <div class="label small">Time</div>
-          <div class="value small">{{ timeLeft }}s</div>
-
-          <div class="label small">Speed</div>
-          <div class="value small">{{ gameSpeed | number : "1.2-2" }}x</div>
+          <div class="stat">
+            <div class="label small">Time</div>
+            <div class="value small">{{ timeLeft }}s</div>
+          </div>
+          <div class="stat">
+            <div class="label small">Speed</div>
+            <div class="value small">{{ gameSpeed | number : "1.2-2" }}x</div>
+          </div>
         </ng-container>
       </aside>
 
