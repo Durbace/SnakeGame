@@ -165,27 +165,30 @@ export class HomeComponent {
     }
 
     if (this.modalType === 'challenge' && this.challengeRef) {
-  if (this.challengeRef.isInSettings) {
-    this.goToPlay('challenge', {
-      settings: {
-        gridSize: this.challengeRef.gridSize,
-        wrapEdges: this.challengeRef.wrapEdges,
-        startingLength: this.challengeRef.startingLength,
-        startingSpeed: this.challengeRef.startingSpeed,
-      },
-      goals: {
-        targetFruits: this.challengeRef.targetFruits,
-        targetTime: this.challengeRef.targetTime,
-        wallsAllowed: this.challengeRef.wallsAllowed,
+      if (this.challengeRef.isInSettings) {
+        this.goToPlay('challenge', {
+          settings: {
+            gridSize: this.challengeRef.gridSize,
+            wrapEdges: this.challengeRef.wrapEdges,
+            startingLength: this.challengeRef.startingLength,
+            startingSpeed: this.challengeRef.startingSpeed,
+          },
+          goals: {
+            targetFruits: this.challengeRef.targetFruits,
+            targetTime: this.challengeRef.targetTime,
+            wallsAllowed: this.challengeRef.wallsAllowed,
+          },
+        });
+      } else {
+        this.challengeRef.onNext();
       }
-    });
-  } else {
-    this.challengeRef.onNext();
-  }
-  return;
-}
-
+      return;
+    }
 
     this.getActiveNextAware()?.onNext();
+  }
+
+  onPlayPicked(mode: 'classic' | 'speed' | 'challenge') {
+    this.modalType = mode;
   }
 }

@@ -16,7 +16,6 @@ import {
   GameSpeedComponent,
   SpeedModeSettings,
 } from '../game-play/game-speed/game-speed.component';
-import { HowToPlayComponent } from '../how-to-play/how-to-play.component';
 import { GameChallengeComponent } from '../game-play/game-challenge/game-challenge.component';
 
 interface ChallengeGoals {
@@ -33,7 +32,6 @@ interface ChallengeGoals {
     CommonModule,
     GameClassicComponent,
     GameSpeedComponent,
-    HowToPlayComponent,
     GameChallengeComponent,
   ],
   templateUrl: './game-stage.component.html',
@@ -48,7 +46,6 @@ export class GameStageComponent implements OnInit {
   @Input() gameSpeed = 1;
   @Input() paused = false;
 
-  @Output() howTo = new EventEmitter<void>();
   @Output() restart = new EventEmitter<void>();
   @Output() pauseToggle = new EventEmitter<void>();
 
@@ -75,9 +72,6 @@ export class GameStageComponent implements OnInit {
   @ViewChild(GameClassicComponent) classicRef?: GameClassicComponent;
   @ViewChild(GameSpeedComponent) speedRef?: GameSpeedComponent;
   @ViewChild(GameChallengeComponent) challengeRef?: GameChallengeComponent;
-
-  showHowTo = false;
-  private wasPausedBeforeHowTo = false;
 
   constructor(private router: Router) {}
 
@@ -111,25 +105,6 @@ export class GameStageComponent implements OnInit {
     this.router.navigate(['/']);
   }
 
-  onClickHowTo() {
-    this.wasPausedBeforeHowTo = this.paused;
-    if (!this.paused) {
-      this.paused = true;
-      this.pauseToggle.emit();
-      this.activeGame()?.setPaused(true);
-    }
-    this.showHowTo = true;
-    this.howTo.emit();
-  }
-
-  closeHowTo() {
-    this.showHowTo = false;
-    if (!this.wasPausedBeforeHowTo) {
-      this.paused = false;
-      this.activeGame()?.setPaused(false);
-    }
-  }
-
   onClickRestart() {
     this.paused = false;
     this.activeGame()?.setPaused(false);
@@ -147,7 +122,6 @@ export class GameStageComponent implements OnInit {
   }
 
   onClickPauseToggle() {
-    if (this.showHowTo) return;
     this.paused = !this.paused;
     this.pauseToggle.emit();
     this.activeGame()?.setPaused(this.paused);
@@ -180,7 +154,6 @@ export class GameStageComponent implements OnInit {
   }
 
   handleResumeRequested() {
-    if (this.showHowTo) return;
     if (this.paused) this.onClickPauseToggle();
   }
 
@@ -191,12 +164,6 @@ export class GameStageComponent implements OnInit {
   @HostListener('window:keydown', ['$event'])
   onKeydown(e: KeyboardEvent) {
     const key = e.key.toLowerCase();
-
-    if (this.showHowTo) {
-      if (key === 'escape') this.closeHowTo();
-      e.preventDefault();
-      return;
-    }
 
     if (
       ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(

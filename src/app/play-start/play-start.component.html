@@ -1,128 +1,34 @@
-<section class="play">
-  <h2 class="play-title">Ready to Play?</h2>
-  <p class="play-lead">
-    Choose your difficulty and tweak a few options. Good luck!
-  </p>
+<section class="play-modes">
+  <h2>Select game mode</h2>
 
-  <div class="play-card">
-    <div class="play-grid">
-      <div class="play-left">
-        <h3>Difficulty</h3>
-
-        <div class="difficulty">
-          <button
-            class="chip"
-            [class.active]="difficulty === 'easy'"
-            (click)="applyPreset('easy')"
-          >
-            Easy
-          </button>
-          <button
-            class="chip"
-            [class.active]="difficulty === 'normal'"
-            (click)="applyPreset('normal')"
-          >
-            Normal
-          </button>
-          <button
-            class="chip"
-            [class.active]="difficulty === 'hard'"
-            (click)="applyPreset('hard')"
-          >
-            Hard
-          </button>
-        </div>
-
-        <ul class="rules">
-          <li>
-            <span class="dot"></span>
-            <span class="text">
-              Snake starts at <strong>length {{ startingLength }}</strong> and
-              <strong>speed {{ startingSpeed }}</strong
-              >.
-            </span>
-          </li>
-          <li>
-            <span class="dot"></span>
-            <span class="text">
-              <strong>Wrap Edges</strong> lets you exit one side and enter from
-              the opposite side.
-            </span>
-          </li>
-          <li>
-            <span class="dot"></span>
-            <span class="text">
-              Colliding with your tail (or walls if wrap OFF) ends the run.
-            </span>
-          </li>
-        </ul>
+  <div class="play-mode-grid">
+    <article class="play-mode-card" (click)="onPick('classic')">
+      <div class="play-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 12h3m-1.5-1.5v3M16 12h.01m2 0h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M6 16l2-2h8l2 2c2 0 3-1.79 3-4s-1-4-3-4H6C4 8 3 9.79 3 12s1 4 3 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
       </div>
+      <h3>Classic Snake</h3>
+    </article>
 
-      <div class="play-right">
-        <h3>Options</h3>
-
-        <div class="options">
-          <label class="opt">
-            <span>Grid Size</span>
-            <div class="range-wrap">
-              <input
-                class="range"
-                type="range"
-                min="12"
-                max="40"
-                step="1"
-                [(ngModel)]="gridSize"
-                aria-label="Grid size"
-              />
-              <span class="range-value">{{ gridSize }}×{{ gridSize }}</span>
-            </div>
-          </label>
-
-          <label class="opt">
-            <span>Starting Length</span>
-            <div class="range-wrap">
-              <input
-                class="range"
-                type="range"
-                min="3"
-                max="8"
-                step="1"
-                [(ngModel)]="startingLength"
-                aria-label="Starting length"
-              />
-              <span class="range-value">{{ startingLength }}</span>
-            </div>
-          </label>
-
-          <label class="opt">
-            <span>Starting Speed</span>
-            <div class="range-wrap">
-              <input
-                class="range"
-                type="range"
-                min="1"
-                max="10"
-                step="1"
-                [(ngModel)]="startingSpeed"
-                aria-label="Starting speed"
-              />
-              <span class="range-value">{{ startingSpeed }}</span>
-            </div>
-          </label>
-
-          <label class="opt row">
-            <span>Wrap Edges</span>
-            <label class="switch small">
-              <input type="checkbox" [(ngModel)]="wrapEdges" />
-              <span class="slider"></span>
-            </label>
-          </label>
-        </div>
-
-        <div class="actions">
-          <button class="btn btn-primary" (click)="onStart()">Start</button>
-        </div>
+    <article class="play-mode-card" (click)="onPick('speed')">
+      <div class="play-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="13" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 13V9m-3-6h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
       </div>
-    </div>
+      <h3>Speed Challenge</h3>
+    </article>
+
+    <article class="play-mode-card" (click)="onPick('challenge')">
+      <div class="play-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2l3 7h7l-5.6 4.1L18.8 22 12 17.6 5.2 22l2.4-8.9L2 9h7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3>Challenge Mode</h3>
+    </article>
   </div>
 </section>

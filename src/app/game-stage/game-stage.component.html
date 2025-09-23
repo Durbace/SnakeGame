@@ -1,4 +1,5 @@
-<div class="game-root" [class.blurred]="showHowTo">
+<!-- înainte: <div class="game-root" [class.blurred]="showHowTo"> -->
+<div class="game-root">
   <header class="topbar">
     <div class="brand" (click)="onClickHome()">
       <span class="logo"></span>
@@ -7,8 +8,7 @@
 
     <nav class="nav">
       <button class="link" (click)="onClickHome()">Home</button>
-      <button class="link" (click)="onClickHowTo()">How to Play</button>
-      <span class="sep" aria-hidden="true">|</span>
+      <!-- eliminat: butonul How to Play + separator -->
       <button class="btn restart" (click)="onClickRestart()">
         <span class="ico-refresh" aria-hidden="true"></span>
         Restart
@@ -16,20 +16,17 @@
       <button
         class="btn pause"
         (click)="onClickPauseToggle()"
-        [attr.aria-label]="paused ? 'Resume' : 'Pause'"
-      >
-        <span
-          [ngClass]="paused ? 'ico-play' : 'ico-pause'"
-          aria-hidden="true"
-        ></span>
+        [attr.aria-label]="paused ? 'Resume' : 'Pause'">
+        <span [ngClass]="paused ? 'ico-play' : 'ico-pause'" aria-hidden="true"></span>
         {{ paused ? "Resume" : "Pause" }}
       </button>
     </nav>
   </header>
 
+
   <main class="play-wrap">
     <div class="play-layout">
-      <aside class="score-side left">
+      <aside class="score-side left" [class.only-score]="mode === 'classic'">
         <div class="stat">
           <div class="label">Score</div>
           <div class="value">{{ score }}</div>
@@ -135,19 +132,4 @@
       </ng-container>
     </div>
   </footer>
-</div>
-
-<div *ngIf="showHowTo" class="modal-wrap" role="dialog" aria-modal="true">
-  <div class="modal-backdrop" (click)="closeHowTo()"></div>
-  <div class="modal-panel" tabindex="-1">
-    <header class="modal-header">
-      <h3>How to Play</h3>
-      <button class="modal-close" (click)="closeHowTo()" aria-label="Close">
-        ×
-      </button>
-    </header>
-    <div class="modal-body">
-      <app-how-to-play></app-how-to-play>
-    </div>
-  </div>
 </div>
