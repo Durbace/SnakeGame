@@ -29,8 +29,9 @@ export class SfxService {
     this.music.loop = true;
     this.music.volume = this.musicVolume;
 
-    Object.values(this.sfx).forEach(a => a.preload = 'auto');
-    this.music.preload = 'auto';
+    Object.values(this.sfx).forEach(a => { a.preload = 'auto'; a.load(); });
+this.music.preload = 'auto';
+this.music.load();   
   }
 
   getEnabled(): boolean       { return this.sfxEnabled; }

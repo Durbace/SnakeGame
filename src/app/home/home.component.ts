@@ -98,7 +98,7 @@ export class HomeComponent {
   }
 
   onMusicVolChanged(vol: number) {
-    this.musicVolume = vol;           // 0..100
+    this.musicVolume = vol; 
     this.sfx.setMusicVolume(vol / 100);
     // localStorage.setItem('musicVolume', String(vol));
   }

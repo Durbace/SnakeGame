@@ -7,6 +7,7 @@ import {
   ViewEncapsulation,
   OnInit,
   HostListener,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -19,6 +20,7 @@ import {
 import { GameChallengeComponent } from '../game-play/game-challenge/game-challenge.component';
 import { SnakeSkin } from '../settings/settings.component';
 import { SnakeSkinStore } from '../services/snake-skin.store';
+import { SfxService } from '../services/sfx.service';
 
 interface ChallengeGoals {
   targetFruits: number;
@@ -40,7 +42,7 @@ interface ChallengeGoals {
   styleUrls: ['./game-stage.component.css'],
   encapsulation: ViewEncapsulation.ShadowDom,
 })
-export class GameStageComponent implements OnInit {
+export class GameStageComponent implements OnInit, OnDestroy {
   @Input() title = 'Retro Snake';
   @Input() score = 0;
   @Input() highScore = 0;
@@ -77,12 +79,17 @@ export class GameStageComponent implements OnInit {
   @ViewChild(GameSpeedComponent) speedRef?: GameSpeedComponent;
   @ViewChild(GameChallengeComponent) challengeRef?: GameChallengeComponent;
 
-  constructor(
+   constructor(
     private router: Router,
-    private skinStore: SnakeSkinStore 
+    private skinStore: SnakeSkinStore,
+    private sfx: SfxService 
   ) {
     this.snakeSkin = this.skinStore.get();
   }
+
+  private unlockMusic = () => {
+    this.sfx.startMusic();
+  };
 
    ngOnInit() {
     const st = this.router.getCurrentNavigation()?.extras?.state ?? window.history.state;
@@ -102,7 +109,21 @@ export class GameStageComponent implements OnInit {
       this.timeLeft = this.goals?.targetTime ?? 0;
       this.fruitsRemaining = this.goals?.targetFruits ?? null;
     }
+    this.sfx.startMusic();
+
+    window.addEventListener('pointerdown', this.unlockMusic, { once: true, capture: true, passive: true });
+    window.addEventListener('keydown',      this.unlockMusic, { once: true, capture: true });
+    window.addEventListener('touchstart',   this.unlockMusic, { once: true, capture: true, passive: true });
   }
+
+  ngOnDestroy() {
+    this.sfx.stopMusic();
+
+    window.removeEventListener('pointerdown', this.unlockMusic, true as any);
+    window.removeEventListener('keydown',      this.unlockMusic, true as any);
+    window.removeEventListener('touchstart',   this.unlockMusic, true as any);
+  }
+
 
   private activeGame() {
     if (this.mode === 'speed') return this.speedRef;
@@ -111,10 +132,12 @@ export class GameStageComponent implements OnInit {
   }
 
   onClickHome() {
+    this.sfx.playButton();
+    this.sfx.stopMusic(); 
     this.router.navigate(['/']);
   }
-
-  onClickRestart() {
+onClickRestart() {
+    this.sfx.playButton(); 
     this.paused = false;
     this.activeGame()?.setPaused(false);
     this.restart.emit();
@@ -131,13 +154,19 @@ export class GameStageComponent implements OnInit {
   }
 
   onClickPauseToggle() {
+    this.sfx.playButton(); 
     this.paused = !this.paused;
     this.pauseToggle.emit();
     this.activeGame()?.setPaused(this.paused);
+    if (this.paused) this.sfx.pauseMusic();
+    else this.sfx.resumeMusic();
   }
 
+
   handleScoreChange(val: number) {
+    const prev = this.score; 
     this.score = val;
+
     if (this.mode !== 'challenge' && this.score > this.highScore) {
       this.highScore = this.score;
     }
@@ -146,6 +175,7 @@ export class GameStageComponent implements OnInit {
       this.fruitsRemaining = Math.max(0, total - this.score);
     }
   }
+
   handleHighScoreChange(val: number) {
     this.highScore = val;
   }
@@ -153,12 +183,14 @@ export class GameStageComponent implements OnInit {
     this.gameSpeed = val;
   }
 
-  handleGameOver() {
+ handleGameOver() {
+    this.sfx.playLose();
     this.paused = true;
     this.activeGame()?.setPaused(true);
   }
 
   handleRequestedRestart() {
+    this.sfx.playButton();
     this.onClickRestart();
   }
 

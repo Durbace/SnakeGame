@@ -11,6 +11,8 @@ import {
   ViewChild,
 } from '@angular/core';
 
+import { SfxService } from '../../services/sfx.service';
+
 type Cell = { x: number; y: number };
 
 type SnakeSkin = {
@@ -26,7 +28,6 @@ export interface ClassicSettings {
   startingLength: number;
   startingSpeed: number;
 }
-
 
 @Component({
   selector: 'app-game-classic',
@@ -45,11 +46,11 @@ export class GameClassicComponent
   @Input() gameSpeed = 1;
 
   @Input() snakeSkin: SnakeSkin = {
-  style: 'stripes',
-  base: '#22c55e',
-  accent: '#065f46',
-  stripeWidth: 6,
-};
+    style: 'stripes',
+    base: '#22c55e',
+    accent: '#065f46',
+    stripeWidth: 6,
+  };
 
   @Output() scoreChange = new EventEmitter<number>();
   @Output() highScoreChange = new EventEmitter<number>();
@@ -85,6 +86,9 @@ export class GameClassicComponent
   private baseTickMs = 120;
 
   private snakeInitLen = 5;
+  private celebratedHighScore = false;
+
+  constructor(private sfx: SfxService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['classicSettings'] && this.classicSettings) {
@@ -209,6 +213,7 @@ export class GameClassicComponent
     this.vy = 0;
     this.score = 0;
     this.over = false;
+    this.celebratedHighScore = false;
 
     this.spawnFood();
     this.drawAll();
@@ -240,12 +245,19 @@ export class GameClassicComponent
     this.snake.unshift(head);
 
     if (head.x === this.food.x && head.y === this.food.y) {
+      this.sfx.playFood();
       this.score++;
       this.scoreChange.emit(this.score);
+
       if (this.score > this.highScore) {
+        if (!this.celebratedHighScore) {
+          this.sfx.playWin();
+          this.celebratedHighScore = true;
+        }
         this.highScore = this.score;
         this.highScoreChange.emit(this.highScore);
       }
+
       this.spawnFood();
     } else {
       this.snake.pop();
@@ -317,105 +329,129 @@ export class GameClassicComponent
   }
 
   private drawAll() {
-  this.ctx.fillStyle = '#f3f3f3';
-  this.ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
+    this.ctx.fillStyle = '#f3f3f3';
+    this.ctx.fillRect(
+      0,
+      0,
+      this.cols * this.cellSize,
+      this.rows * this.cellSize
+    );
 
-  this.ctx.fillStyle = 'red';
-  this.ctx.fillRect(
-    this.food.x * this.cellSize,
-    this.food.y * this.cellSize,
-    this.cellSize,
-    this.cellSize
-  );
+    this.ctx.fillStyle = 'red';
+    this.ctx.fillRect(
+      this.food.x * this.cellSize,
+      this.food.y * this.cellSize,
+      this.cellSize,
+      this.cellSize
+    );
 
-  this.drawSnakeOnePiece(this.ctx, this.snake, this.cellSize, this.snakeSkin);
-}
-
-private drawSnakeOnePiece(
-  ctx: CanvasRenderingContext2D,
-  snakeCells: {x:number,y:number}[],
-  tile: number,
-  skin: SnakeSkin
-) {
-  if (snakeCells.length === 0) return;
-
-  if (snakeCells.length === 1) {
-    this.setStrokeForSkin(ctx, skin, 0, 0, 1, 0); 
-    ctx.fillStyle = (skin.style === 'solid') ? skin.base :
-                    (skin.style === 'gradient')
-                      ? this.linearGradientForRect(ctx, snakeCells[0], tile, skin)
-                      : this.makeStripePattern(ctx, skin) as any;
-    ctx.fillRect(snakeCells[0].x * tile, snakeCells[0].y * tile, tile, tile);
-    return;
+    this.drawSnakeOnePiece(this.ctx, this.snake, this.cellSize, this.snakeSkin);
   }
 
-  const pts = snakeCells.map(c => ({
-    x: c.x * tile + tile / 2,
-    y: c.y * tile + tile / 2,
-  }));
+  private drawSnakeOnePiece(
+    ctx: CanvasRenderingContext2D,
+    snakeCells: { x: number; y: number }[],
+    tile: number,
+    skin: SnakeSkin
+  ) {
+    if (snakeCells.length === 0) return;
 
-  const p0 = pts[0], pN = pts[pts.length - 1];
-  this.setStrokeForSkin(ctx, skin, p0.x, p0.y, pN.x, pN.y);
+    if (snakeCells.length === 1) {
+      this.setStrokeForSkin(ctx, skin, 0, 0, 1, 0);
+      ctx.fillStyle =
+        skin.style === 'solid'
+          ? skin.base
+          : skin.style === 'gradient'
+          ? this.linearGradientForRect(ctx, snakeCells[0], tile, skin)
+          : (this.makeStripePattern(ctx, skin) as any);
+      ctx.fillRect(snakeCells[0].x * tile, snakeCells[0].y * tile, tile, tile);
+      return;
+    }
 
-  ctx.lineWidth = tile;
-  ctx.lineCap = 'butt'; 
-  ctx.lineJoin = 'round'; 
-  ctx.miterLimit = 3;
+    const pts = snakeCells.map((c) => ({
+      x: c.x * tile + tile / 2,
+      y: c.y * tile + tile / 2,
+    }));
 
-  const snap = (v: number) => Math.round(v) + 0.5;
+    const p0 = pts[0],
+      pN = pts[pts.length - 1];
+    this.setStrokeForSkin(ctx, skin, p0.x, p0.y, pN.x, pN.y);
 
-  ctx.beginPath();
-  ctx.moveTo(snap(pts[0].x), snap(pts[0].y));
-  for (let i = 1; i < pts.length; i++) {
-    ctx.lineTo(snap(pts[i].x), snap(pts[i].y));
+    ctx.lineWidth = tile;
+    ctx.lineCap = 'butt';
+    ctx.lineJoin = 'round';
+    ctx.miterLimit = 3;
+
+    const snap = (v: number) => Math.round(v) + 0.5;
+
+    ctx.beginPath();
+    ctx.moveTo(snap(pts[0].x), snap(pts[0].y));
+    for (let i = 1; i < pts.length; i++) {
+      ctx.lineTo(snap(pts[i].x), snap(pts[i].y));
+    }
+    ctx.stroke();
   }
-  ctx.stroke();
-}
 
-private setStrokeForSkin(
-  ctx: CanvasRenderingContext2D,
-  skin: SnakeSkin,
-  x1: number, y1: number, x2: number, y2: number
-) {
-  if (skin.style === 'solid') {
-    ctx.strokeStyle = skin.base;
-    return;
+  private setStrokeForSkin(
+    ctx: CanvasRenderingContext2D,
+    skin: SnakeSkin,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ) {
+    if (skin.style === 'solid') {
+      ctx.strokeStyle = skin.base;
+      return;
+    }
+    if (skin.style === 'gradient') {
+      const g = ctx.createLinearGradient(x1, y1, x2, y2);
+      g.addColorStop(0, skin.base);
+      g.addColorStop(1, skin.accent);
+      ctx.strokeStyle = g;
+      return;
+    }
+    ctx.strokeStyle = this.makeStripePattern(ctx, skin);
   }
-  if (skin.style === 'gradient') {
-    const g = ctx.createLinearGradient(x1, y1, x2, y2);
-    g.addColorStop(0, skin.base);
-    g.addColorStop(1, skin.accent);
-    ctx.strokeStyle = g;
-    return;
+
+  private makeStripePattern(
+    ctx: CanvasRenderingContext2D,
+    s: SnakeSkin
+  ): CanvasPattern {
+    const size = Math.max(4, s.stripeWidth) * 2;
+    const off = document.createElement('canvas');
+    off.width = size;
+    off.height = size;
+    const o = off.getContext('2d')!;
+    o.fillStyle = s.base;
+    o.fillRect(0, 0, size, size);
+    o.strokeStyle = s.accent;
+    o.lineWidth = s.stripeWidth;
+    o.beginPath();
+    o.moveTo(-size, size * 0.6);
+    o.lineTo(size * 2, -size * 0.4);
+    o.moveTo(-size, size * 1.6);
+    o.lineTo(size * 2, size * 0.6);
+    o.stroke();
+    return ctx.createPattern(off, 'repeat')!;
   }
-  ctx.strokeStyle = this.makeStripePattern(ctx, skin);
-}
 
-private makeStripePattern(ctx: CanvasRenderingContext2D, s: SnakeSkin): CanvasPattern {
-  const size = Math.max(4, s.stripeWidth) * 2;
-  const off = document.createElement('canvas');
-  off.width = size; off.height = size;
-  const o = off.getContext('2d')!;
-  o.fillStyle = s.base;
-  o.fillRect(0, 0, size, size);
-  o.strokeStyle = s.accent;
-  o.lineWidth = s.stripeWidth;
-  o.beginPath();
-  o.moveTo(-size, size * 0.6); o.lineTo(size * 2, -size * 0.4);
-  o.moveTo(-size, size * 1.6); o.lineTo(size * 2,  size * 0.6);
-  o.stroke();
-  return ctx.createPattern(off, 'repeat')!;
-}
-
-private linearGradientForRect(ctx: CanvasRenderingContext2D, c: Cell, tile: number, s: SnakeSkin) {
-  const x1 = c.x * tile, y1 = c.y * tile;
-  const g = ctx.createLinearGradient(x1, y1, x1 + tile, y1 + tile);
-  g.addColorStop(0, s.base);
-  g.addColorStop(1, s.accent);
-  return g;
-}
+  private linearGradientForRect(
+    ctx: CanvasRenderingContext2D,
+    c: Cell,
+    tile: number,
+    s: SnakeSkin
+  ) {
+    const x1 = c.x * tile,
+      y1 = c.y * tile;
+    const g = ctx.createLinearGradient(x1, y1, x1 + tile, y1 + tile);
+    g.addColorStop(0, s.base);
+    g.addColorStop(1, s.accent);
+    return g;
+  }
 
   public onCanvasClick(): void {
+    this.sfx.playButton(); 
     if (this.over) {
       this.requestRestart.emit();
       return;
@@ -424,6 +460,7 @@ private linearGradientForRect(ctx: CanvasRenderingContext2D, c: Cell, tile: numb
       this.resumeRequested.emit();
     }
   }
+
   private drawPauseOverlay() {
     this.ctx.save();
     this.ctx.globalAlpha = 0.7;

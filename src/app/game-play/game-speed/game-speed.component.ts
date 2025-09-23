@@ -11,6 +11,8 @@ import {
   ViewChild,
 } from '@angular/core';
 
+import { SfxService } from '../../services/sfx.service';
+
 type Cell = { x: number; y: number };
 
 type SnakeSkin = {
@@ -115,9 +117,13 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
   private APPLY_STEP = 0.04;
   private fruitsCollected = 0;
 
+  private celebratedHighScore = false;
+
   private keyOf(c: Cell) {
     return `${c.x},${c.y}`;
   }
+
+   constructor(private sfx: SfxService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (
@@ -314,6 +320,8 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.fruitsCollected = 0;
     this.over = false;
 
+    this.celebratedHighScore = false;
+
     this.generateObstacles();
 
     this.spawnFood();
@@ -395,9 +403,14 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.snake.unshift(head);
 
     if (head.x === this.food.x && head.y === this.food.y) {
+      this.sfx.playFood();
       this.score++;
       this.scoreChange.emit(this.score);
       if (this.score > this.highScore) {
+        if (!this.celebratedHighScore) {
+          this.sfx.playWin(); 
+          this.celebratedHighScore = true;
+        }
         this.highScore = this.score;
         this.highScoreChange.emit(this.highScore);
       }
@@ -421,7 +434,6 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
       this.finishGame('lose');
       return;
 
-      return;
     }
 
     for (let i = 1; i < this.snake.length; i++) {
@@ -430,14 +442,11 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
         this.finishGame('lose');
         return;
 
-        return;
       }
     }
 
     if (this.obstaclesOn && this.obstacles.has(this.keyOf(head))) {
       this.finishGame('lose');
-      return;
-
       return;
     }
 
@@ -445,61 +454,50 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private finishGame(reason: 'win' | 'lose' | 'finish') {
-    this.over = true;
-    window.clearInterval(this.intervalId);
-    this.drawAll();
+  this.over = true;
+  window.clearInterval(this.intervalId);
 
-    this.ctx.save();
-    this.ctx.globalAlpha = 0.75;
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(
-      0,
-      0,
-      this.cols * this.cellSize,
-      this.rows * this.cellSize
-    );
-    this.ctx.restore();
+  if (reason === 'win' || reason === 'finish') this.sfx.playWin();
+  else this.sfx.playLose();
 
-    let title = 'Game Over';
-    let titleColor = '#ffffff';
-    if (reason === 'win') {
-      title = 'You Win!';
-      titleColor = '#22c55e';
-    } else if (reason === 'finish') {
-      title = "Time's Up!";
-      titleColor = '#38bdf8';
-    }
+  this.drawAll();
 
-    this.ctx.textAlign = 'center';
+  this.ctx.save();
+  this.ctx.globalAlpha = 0.75;
+  this.ctx.fillStyle = '#000';
+  this.ctx.fillRect(0, 0, this.cols * this.cellSize, this.rows * this.cellSize);
+  this.ctx.restore();
 
-    this.ctx.fillStyle = titleColor;
-    this.ctx.font = 'bold 28px monospace';
-    this.ctx.fillText(
-      title,
-      (this.cols * this.cellSize) / 2,
-      (this.rows * this.cellSize) / 2 - 10
-    );
-
-    this.ctx.fillStyle = '#e5e7eb';
-    this.ctx.font = '14px monospace';
-    const cx = (this.cols * this.cellSize) / 2;
-    const cy = (this.rows * this.cellSize) / 2 + 16;
-
-    const lines: string[] = [
-      `Score: ${this.score}`,
-      `Speed: ${this.gameSpeed.toFixed(2)}x`,
-      this.targetFruits
-        ? `Fruits: ${this.fruitsCollected}/${this.targetFruits}`
-        : '',
-      'Click to Restart',
-    ].filter(Boolean);
-
-    lines.forEach((t, i) => {
-      this.ctx.fillText(t, cx, cy + i * 20);
-    });
-
-    this.gameOver.emit();
+  let title = 'Game Over';
+  let titleColor = '#ffffff';
+  if (reason === 'win') {
+    title = 'You Win!';
+    titleColor = '#22c55e';
+  } else if (reason === 'finish') {
+    title = "Time's Up!";
+    titleColor = '#38bdf8';
   }
+
+  this.ctx.textAlign = 'center';
+  this.ctx.fillStyle = titleColor;
+  this.ctx.font = 'bold 28px monospace';
+  this.ctx.fillText(title, (this.cols * this.cellSize) / 2, (this.rows * this.cellSize) / 2 - 10);
+
+  this.ctx.fillStyle = '#e5e7eb';
+  this.ctx.font = '14px monospace';
+  const cx = (this.cols * this.cellSize) / 2;
+  const cy = (this.rows * this.cellSize) / 2 + 16;
+  const lines: string[] = [
+    `Score: ${this.score}`,
+    `Speed: ${this.gameSpeed.toFixed(2)}x`,
+    this.targetFruits ? `Fruits: ${this.fruitsCollected}/${this.targetFruits}` : '',
+    'Click to Restart',
+  ].filter(Boolean);
+  lines.forEach((t, i) => this.ctx.fillText(t, cx, cy + i * 20));
+
+  this.gameOver.emit();
+}
+
 
   private generateObstacles() {
     this.obstacles.clear();
@@ -690,13 +688,12 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   public onCanvasClick(): void {
+    this.sfx.playButton(); 
     if (this.over) {
       this.requestRestart.emit();
       return;
     }
-    if (this.paused) {
-      this.resumeRequested.emit();
-    }
+    if (this.paused) this.resumeRequested.emit();
   }
 
   private drawPauseOverlay() {
