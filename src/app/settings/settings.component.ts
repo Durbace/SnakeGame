@@ -11,6 +11,7 @@ import {
   HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SfxService } from '../services/sfx.service';
 
 export type SnakeSkin = {
   style: 'solid' | 'stripes' | 'gradient';
@@ -49,13 +50,17 @@ export class SettingsComponent implements AfterViewInit, OnChanges {
 
   @ViewChild('previewCanvas') previewCanvas!: ElementRef<HTMLCanvasElement>;
 
-  onToggleSfx(evt: Event) {
+  constructor(private sfx: SfxService) {}
+
+   onToggleSfx(evt: Event) {
     const checked = (evt.target as HTMLInputElement).checked;
     this.sfxToggled.emit(checked);
+    this.sfx.setEnabled(checked);  
   }
   onChangeMusicVol(evt: Event) {
     const vol = +(evt.target as HTMLInputElement).value;
     this.musicVolumeChange.emit(vol);
+    this.sfx.setMusicVolume(vol / 100); 
   }
 
   onChangeStyle(style: SnakeSkin['style']) {

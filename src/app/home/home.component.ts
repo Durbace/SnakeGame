@@ -9,6 +9,7 @@ import { SpeedModeComponent } from '../game-modes/speed-mode/speed-mode.componen
 import { ChallengeModeComponent } from '../game-modes/challenge-mode/challenge-mode.component';
 import { PlayStartComponent } from '../play-start/play-start.component';
 import { SnakeSkinStore } from '../services/snake-skin.store';
+import { SfxService } from '../services/sfx.service';
 
 type ModalType =
   | 'play'
@@ -50,6 +51,8 @@ export class HomeComponent {
   modalType: ModalType = null;
   modalTitleId = 'modal-title-' + Math.random().toString(36).slice(2, 8);
   snakeSkin!: SnakeSkin;
+  sfxEnabled = true;
+  musicVolume = 50;
 
   private readonly nextSupported = new Set<Exclude<ModalType, null>>([
     'classic',
@@ -57,11 +60,21 @@ export class HomeComponent {
     'challenge',
   ]);
 
-  constructor(private router: Router, private skinStore: SnakeSkinStore) {
+  constructor(
+    private router: Router,
+    private skinStore: SnakeSkinStore,
+    private sfx: SfxService 
+  ) {
     this.snakeSkin = this.skinStore.get();
-  } 
+    if ((this.sfx as any).getEnabled) {
+      this.sfxEnabled = this.sfx.getEnabled();
+    }
+    if ((this.sfx as any).getMusicVolume) {
+      this.musicVolume = Math.round(this.sfx.getMusicVolume() * 100);
+    }
+  }
 
-onSkinChanged(s: SnakeSkin) {
+  onSkinChanged(s: SnakeSkin) {
     this.snakeSkin = { ...s };
     this.skinStore.set(this.snakeSkin);
   }
@@ -70,11 +83,26 @@ onSkinChanged(s: SnakeSkin) {
     mode: 'classic' | 'speed' | 'challenge',
     extraState: Record<string, any> = {}
   ) {
+    this.sfx.playButton();
     this.closeModal();
     this.router.navigate(['/play'], {
       state: { mode, ...extraState, snakeSkin: this.snakeSkin },
     });
   }
+
+    onToggleSfx(enabled: boolean) {
+    this.sfxEnabled = enabled;
+    this.sfx.setEnabled(enabled);
+    // opțional: persistă în localStorage dacă vrei să țină peste refresh
+    // localStorage.setItem('sfxEnabled', JSON.stringify(enabled));
+  }
+
+  onMusicVolChanged(vol: number) {
+    this.musicVolume = vol;           // 0..100
+    this.sfx.setMusicVolume(vol / 100);
+    // localStorage.setItem('musicVolume', String(vol));
+  }
+
 
   get modalTitle(): string {
     switch (this.modalType) {
@@ -96,20 +124,26 @@ onSkinChanged(s: SnakeSkin) {
   }
 
   openModal(type: Exclude<ModalType, null>) {
+    this.sfx.playButton();
     this.modalType = type;
     this.isModalOpen = true;
   }
   closeModal() {
+    this.sfx.playButton();
     this.isModalOpen = false;
     this.modalType = null;
   }
   onOverlayClick(_: MouseEvent) {
+    this.sfx.playButton();
     this.closeModal();
   }
 
   @HostListener('document:keydown.escape')
   onEsc() {
-    if (this.isModalOpen) this.closeModal();
+    if (this.isModalOpen) {
+      this.sfx.playButton();
+      this.closeModal();
+    }
   }
 
   get showsNext(): boolean {
@@ -135,6 +169,7 @@ onSkinChanged(s: SnakeSkin) {
   }
 
   onNextClick() {
+    this.sfx.playButton();
     if (this.modalType === 'classic' && this.classicRef) {
       if (this.classicRef.isInSettings) {
         this.goToPlay('classic', {
@@ -200,6 +235,7 @@ onSkinChanged(s: SnakeSkin) {
   }
 
   onPlayPicked(mode: 'classic' | 'speed' | 'challenge') {
+    this.sfx.playButton();
     this.modalType = mode;
   }
 }

@@ -53,6 +53,10 @@
         <app-settings
           [snakeSkin]="snakeSkin"
           (snakeSkinChange)="onSkinChanged($event)"
+          [sfxEnabled]="sfxEnabled"
+          (sfxToggled)="onToggleSfx($event)"
+          [musicVolume]="musicVolume"
+          (musicVolumeChange)="onMusicVolChanged($event)"
         ></app-settings>
       </ng-container>
 
