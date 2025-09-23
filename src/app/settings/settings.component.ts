@@ -121,34 +121,41 @@ export class SettingsComponent implements AfterViewInit, OnChanges {
   }
 
   private drawPreview() {
-    if (!this.ctx) return;
+  if (!this.ctx) return;
 
-    const ctx = this.ctx;
-    const W = this.cssW;
-    const H = this.cssH;
+  const ctx = this.ctx;
+  const W = this.cssW;
+  const H = this.cssH;
 
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = '#f8fafc';
-    ctx.fillRect(0, 0, W, H);
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(0, 0, W, H);
 
-    const tile = 18;
-    const barLen = Math.min(W - 40, Math.max(100, Math.floor(W * 0.55)));
-    const cx = Math.floor(W / 2);
-    const cy = Math.floor(H / 2);
+  const tile = 18;
+  const cx = Math.floor(W / 2);
+  const cy = Math.floor(H / 2);
 
-    this.applyStroke(ctx, cx - barLen / 2, cy, cx + barLen / 2, cy);
+  const rawLen = Math.min(W - 40, Math.max(100, Math.floor(W * 0.55)));
 
-    ctx.lineWidth = tile;
-    ctx.lineCap = 'butt';
-    ctx.lineJoin = 'bevel';
+  this.applyStroke(ctx, cx - rawLen / 2, cy, cx + rawLen / 2, cy);
 
-    const snap = (v: number) => Math.round(v) + 0.5;
+  ctx.lineWidth = tile;
 
-    ctx.beginPath();
-    ctx.moveTo(snap(cx - barLen / 2), snap(cy));
-    ctx.lineTo(snap(cx + barLen / 2), snap(cy));
-    ctx.stroke();
-  }
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const half = tile / 2;
+  const x1 = cx - rawLen / 2 + half;
+  const x2 = cx + rawLen / 2 - half;
+
+  const snap = (v: number) => Math.round(v) + 0.5;
+
+  ctx.beginPath();
+  ctx.moveTo(snap(x1), snap(cy));
+  ctx.lineTo(snap(x2), snap(cy));
+  ctx.stroke();
+}
+
 
   private applyStroke(
     ctx: CanvasRenderingContext2D,

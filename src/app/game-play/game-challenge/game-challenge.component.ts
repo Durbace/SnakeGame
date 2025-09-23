@@ -583,47 +583,94 @@ export class GameChallengeComponent
   }
 
   private drawSnakeOnePiece(
-    ctx: CanvasRenderingContext2D,
-    snakeCells: { x: number; y: number }[],
-    tile: number,
-    skin: SnakeSkin
-  ) {
-    if (snakeCells.length === 0) return;
+  ctx: CanvasRenderingContext2D,
+  snakeCells: { x: number; y: number }[],
+  tile: number,
+  skin: SnakeSkin
+) {
+  if (snakeCells.length === 0) return;
 
-    if (snakeCells.length === 1) {
-      ctx.fillStyle =
-        skin.style === 'solid'
-          ? skin.base
-          : skin.style === 'gradient'
-          ? this.linearGradientForRect(ctx, snakeCells[0], tile, skin)
-          : (this.makeStripePattern(ctx, skin) as any);
-      ctx.fillRect(snakeCells[0].x * tile, snakeCells[0].y * tile, tile, tile);
-      return;
-    }
-
-    const pts = snakeCells.map((c) => ({
-      x: c.x * tile + tile / 2,
-      y: c.y * tile + tile / 2,
-    }));
-
-    const p0 = pts[0],
-      pN = pts[pts.length - 1];
-    this.setStrokeForSkin(ctx, skin, p0.x, p0.y, pN.x, pN.y);
-
-    ctx.lineWidth = tile;
-    ctx.lineCap = 'butt';
-    ctx.lineJoin = 'round';
-    ctx.miterLimit = 3;
-
-    const snap = (v: number) => Math.round(v) + 0.5;
-
-    ctx.beginPath();
-    ctx.moveTo(snap(pts[0].x), snap(pts[0].y));
-    for (let i = 1; i < pts.length; i++) {
-      ctx.lineTo(snap(pts[i].x), snap(pts[i].y));
-    }
-    ctx.stroke();
+  if (snakeCells.length === 1) {
+    ctx.fillStyle =
+      skin.style === 'solid'
+        ? skin.base
+        : skin.style === 'gradient'
+        ? this.linearGradientForRect(ctx, snakeCells[0], tile, skin)
+        : (this.makeStripePattern(ctx, skin) as any);
+    ctx.fillRect(snakeCells[0].x * tile, snakeCells[0].y * tile, tile, tile);
+    return;
   }
+
+  const cx = (gx: number) => gx * tile + tile / 2;
+  const cy = (gy: number) => gy * tile + tile / 2;
+
+  const p0 = { x: cx(snakeCells[0].x), y: cy(snakeCells[0].y) };
+  const pN = { x: cx(snakeCells[snakeCells.length - 1].x), y: cy(snakeCells[snakeCells.length - 1].y) };
+  this.setStrokeForSkin(ctx, skin, p0.x, p0.y, pN.x, pN.y);
+
+  ctx.lineWidth = tile;
+  ctx.lineCap = 'round';  
+  ctx.lineJoin = 'round';
+  ctx.miterLimit = 3;
+
+  const snap = (v: number) => Math.round(v) + 0.5;
+
+  ctx.beginPath();
+  ctx.moveTo(snap(p0.x), snap(p0.y));
+
+  for (let i = 1; i < snakeCells.length; i++) {
+    const a = snakeCells[i - 1];
+    const b = snakeCells[i];
+
+    const ax = cx(a.x), ay = cy(a.y);
+    const bx = cx(b.x), by = cy(b.y);
+
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+
+    const horizontalWrap = this.wrapEdges && Math.abs(dx) > 1;
+    const verticalWrap   = this.wrapEdges && Math.abs(dy) > 1;
+
+    if (horizontalWrap) {
+      const leftEdgeX  = 0; 
+      const rightEdgeX = this.cols * tile; 
+
+      const jumpedLeftToRight = a.x < b.x;
+      const edgeFrom = jumpedLeftToRight ? leftEdgeX  : rightEdgeX;
+      const edgeTo   = jumpedLeftToRight ? rightEdgeX : leftEdgeX;
+
+      ctx.lineTo(snap(edgeFrom), snap(ay));
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(snap(edgeTo), snap(by));
+      ctx.lineTo(snap(bx), snap(by));
+      continue;
+    }
+
+    if (verticalWrap) {
+      const topEdgeY    = 0;
+      const bottomEdgeY = this.rows * tile;
+
+      const jumpedTopToBottom = a.y < b.y;
+      const edgeFrom = jumpedTopToBottom ? topEdgeY    : bottomEdgeY;
+      const edgeTo   = jumpedTopToBottom ? bottomEdgeY : topEdgeY;
+
+      ctx.lineTo(snap(ax), snap(edgeFrom));
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(snap(bx), snap(edgeTo));
+      ctx.lineTo(snap(bx), snap(by));
+      continue;
+    }
+
+    ctx.lineTo(snap(bx), snap(by));
+  }
+
+  ctx.stroke();
+}
+
 
   private setStrokeForSkin(
     ctx: CanvasRenderingContext2D,
