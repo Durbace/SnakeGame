@@ -1,7 +1,8 @@
 <section class="classic" *ngIf="!showSettings">
   <h2 class="classic-title">Challenge Mode</h2>
   <p class="classic-lead">
-    Short missions with clear objectives. Finish levels fast, earn stars, and climb the ladder.
+    Short missions with clear objectives. Finish levels fast, earn stars, and
+    climb the ladder.
   </p>
 
   <div class="classic-card">
@@ -12,13 +13,15 @@
           <li>
             <span class="dot"></span>
             <span class="text">
-              Collect <strong>{{ targetFruits }}</strong> fruits before time runs out.
+              Collect <strong>{{ targetFruits }}</strong> fruits before time
+              runs out.
             </span>
           </li>
           <li>
             <span class="dot"></span>
             <span class="text">
-              Survive for <strong>{{ targetTime }}</strong> seconds to secure extra stars.
+              Survive for <strong>{{ targetTime }}</strong> seconds to secure
+              extra stars.
             </span>
           </li>
           <li>
@@ -32,22 +35,17 @@
           <li>
             <span class="dot"></span>
             <span class="text">
-              Use <span class="kbd">Arrow Keys</span> or <span class="kbd">WASD</span>.
+              Use <span class="kbd">Arrow Keys</span> or
+              <span class="kbd">WASD</span>.
             </span>
           </li>
         </ul>
       </div>
 
       <div class="classic-right" aria-hidden="true">
-        <div class="preview">
-          <div class="grid">
-            <span class="cell snake"></span>
-            <span class="cell snake"></span>
-            <span class="cell snake head"></span>
-            <span class="cell fruit"></span>
-          </div>
+        <div class="preview-image">
+          <img src="assets/images/challenge.jpg" alt="Challenge Mode Preview" />
         </div>
-        <div class="hint star-hint">Target stars: {{ starHint }}</div>
       </div>
     </div>
   </div>
@@ -69,8 +67,11 @@
             <span>Columns (width)</span>
             <div class="range-wrap">
               <input
-                class="range" type="range"
-                min="10" max="60" step="1"
+                class="range"
+                type="range"
+                min="10"
+                max="60"
+                step="1"
                 [(ngModel)]="gridSize"
                 aria-label="Columns (width)"
                 (input)="clampGrid()"
@@ -83,8 +84,11 @@
             <span>Starting Length</span>
             <div class="range-wrap">
               <input
-                class="range" type="range"
-                min="1" max="10" step="1"
+                class="range"
+                type="range"
+                min="1"
+                max="10"
+                step="1"
                 [(ngModel)]="startingLength"
                 aria-label="Starting length"
               />
@@ -96,8 +100,11 @@
             <span>Starting Speed</span>
             <div class="range-wrap">
               <input
-                class="range" type="range"
-                min="1" max="10" step="1"
+                class="range"
+                type="range"
+                min="1"
+                max="10"
+                step="1"
                 [(ngModel)]="startingSpeed"
                 aria-label="Starting speed"
               />
@@ -108,7 +115,11 @@
           <label class="opt row">
             <span>Wrap Edges</span>
             <label class="switch small">
-              <input type="checkbox" [(ngModel)]="wrapEdges" aria-label="Wrap edges" />
+              <input
+                type="checkbox"
+                [(ngModel)]="wrapEdges"
+                aria-label="Wrap edges"
+              />
               <span class="slider"></span>
             </label>
           </label>
@@ -117,9 +128,13 @@
             <span>Target Fruits</span>
             <div class="range-wrap">
               <input
-                class="range" type="range"
-                min="5" max="40" step="1"
-                [(ngModel)]="targetFruits" aria-label="Target fruits"
+                class="range"
+                type="range"
+                min="5"
+                max="40"
+                step="1"
+                [(ngModel)]="targetFruits"
+                aria-label="Target fruits"
               />
               <span class="range-value">{{ targetFruits }}</span>
             </div>
@@ -129,9 +144,13 @@
             <span>Time Limit (sec)</span>
             <div class="range-wrap">
               <input
-                class="range" type="range"
-                min="30" max="300" step="10"
-                [(ngModel)]="targetTime" aria-label="Time limit in seconds"
+                class="range"
+                type="range"
+                min="30"
+                max="300"
+                step="10"
+                [(ngModel)]="targetTime"
+                aria-label="Time limit in seconds"
               />
               <span class="range-value">{{ targetTime }}s</span>
             </div>
@@ -140,26 +159,14 @@
           <label class="opt row">
             <span>Walls Allowed</span>
             <label class="switch small">
-              <input type="checkbox" [(ngModel)]="wallsAllowed" aria-label="Walls allowed" />
+              <input
+                type="checkbox"
+                [(ngModel)]="wallsAllowed"
+                aria-label="Walls allowed"
+              />
               <span class="slider"></span>
             </label>
           </label>
-        </div>
-      </div>
-
-      <div class="classic-right" aria-hidden="true">
-        <div class="preview settings-preview">
-          <div class="grid">
-            <span class="cell snake"></span>
-            <span class="cell snake head"></span>
-            <span class="cell fruit"></span>
-          </div>
-          <div class="hint">
-            Grid: {{ gridSize }}×26 • Speed: {{ startingSpeed }}
-          </div>
-          <div class="hint">
-            Goal: {{ targetFruits }} fruits • {{ targetTime }}s
-          </div>
         </div>
       </div>
     </div>
