@@ -32,18 +32,19 @@
       </div>
 
       <div class="classic-right" aria-hidden="true">
-  <div class="preview-image">
-    <img src="assets/images/classic.jpg" alt="Classic Mode Preview" />
-  </div>
-</div>
-
+        <div class="preview-image">
+          <img src="assets/images/classic.jpg" alt="Classic Mode Preview" />
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
 <section class="classic" *ngIf="showSettings">
   <h2 class="classic-title">Classic Settings</h2>
-  <p class="classic-lead">Height is fixed to 26 rows. Adjust width (columns).</p>
+  <p class="classic-lead">
+    Height is fixed to 26 rows. Adjust width (columns).
+  </p>
 
   <div class="classic-card">
     <div class="classic-grid">
@@ -114,15 +115,8 @@
       </div>
 
       <div class="classic-right" aria-hidden="true">
-        <div class="preview settings-preview">
-          <div class="grid">
-            <span class="cell snake"></span>
-            <span class="cell snake head"></span>
-            <span class="cell fruit"></span>
-          </div>
-          <div class="hint">
-            Grid: {{ gridSize }}×26 • Speed: {{ startingSpeed }}
-          </div>
+        <div class="preview-image">
+          <img src="assets/images/classic.jpg" alt="Classic Mode Preview" />
         </div>
       </div>
     </div>
