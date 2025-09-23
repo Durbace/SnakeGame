@@ -10,6 +10,7 @@ import { ChallengeModeComponent } from '../game-modes/challenge-mode/challenge-m
 import { PlayStartComponent } from '../play-start/play-start.component';
 import { SnakeSkinStore } from '../services/snake-skin.store';
 import { SfxService } from '../services/sfx.service';
+import { Subscription } from 'rxjs';
 
 type ModalType =
   | 'play'
@@ -60,35 +61,49 @@ export class HomeComponent {
     'challenge',
   ]);
 
+  private skinSub?: Subscription;
+
   constructor(
-    private router: Router,
-    private skinStore: SnakeSkinStore,
-    private sfx: SfxService 
-  ) {
-    this.snakeSkin = this.skinStore.get();
-    if ((this.sfx as any).getEnabled) {
-      this.sfxEnabled = this.sfx.getEnabled();
-    }
-    if ((this.sfx as any).getMusicVolume) {
-      this.musicVolume = Math.round(this.sfx.getMusicVolume() * 100);
-    }
+  private router: Router,
+  private skinStore: SnakeSkinStore,
+  private sfx: SfxService
+) {
+  this.snakeSkin = this.skinStore.get();
+
+  this.skinSub = this.skinStore.skin$.subscribe(s => {
+    this.snakeSkin = s;
+  });
+
+  if ((this.sfx as any).getEnabled) {
+    this.sfxEnabled = this.sfx.getEnabled();
   }
+  if ((this.sfx as any).getMusicVolume) {
+    this.musicVolume = Math.round(this.sfx.getMusicVolume() * 100);
+  }
+}
+
+ngOnDestroy() {
+  this.skinSub?.unsubscribe();
+}
 
   onSkinChanged(s: SnakeSkin) {
-    this.snakeSkin = { ...s };
-    this.skinStore.set(this.snakeSkin);
-  }
+  this.skinStore.set(s);
+  this.snakeSkin = { ...s }; 
+}
 
   private goToPlay(
-    mode: 'classic' | 'speed' | 'challenge',
-    extraState: Record<string, any> = {}
-  ) {
-    this.sfx.playButton();
-    this.closeModal();
-    this.router.navigate(['/play'], {
-      state: { mode, ...extraState, snakeSkin: this.snakeSkin },
-    });
-  }
+  mode: 'classic' | 'speed' | 'challenge',
+  extraState: Record<string, any> = {}
+) {
+  this.sfx.playButton();
+  this.closeModal();
+
+  const skin = this.skinStore.get(); 
+  this.router.navigate(['/play'], {
+    state: { mode, ...extraState, snakeSkin: skin },
+  });
+}
+
 
     onToggleSfx(enabled: boolean) {
     this.sfxEnabled = enabled;

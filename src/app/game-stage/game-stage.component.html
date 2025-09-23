@@ -7,6 +7,7 @@
 
     <nav class="nav">
       <button class="link" (click)="onClickHome()">Home</button>
+      <button class="link" (click)="openSettings()">Settings</button>
       <button class="btn restart" (click)="onClickRestart()">
         <span class="ico-refresh" aria-hidden="true"></span>
         Restart
@@ -133,4 +134,28 @@
       </ng-container>
     </div>
   </footer>
+
+  <div
+  class="modal-overlay"
+  *ngIf="isSettingsOpen"
+  (click)="onSettingsOverlayClick($event)"
+>
+  <div class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Settings</h3>
+      <button class="modal-close" (click)="closeSettings()" aria-label="Close">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <app-settings
+        [sfxEnabled]="sfxEnabledUi"
+        [musicVolume]="musicVolumeUi"
+        [snakeSkin]="snakeSkin"
+        (sfxToggled)="onSettingsSfxToggled($event)"
+        (musicVolumeChange)="onSettingsMusicChanged($event)"
+        (snakeSkinChange)="onSnakeSkinChange($event)"
+      ></app-settings>
+    </div>
+  </div>
+</div>
 </div>

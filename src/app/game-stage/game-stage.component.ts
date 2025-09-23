@@ -21,6 +21,7 @@ import { GameChallengeComponent } from '../game-play/game-challenge/game-challen
 import { SnakeSkin } from '../settings/settings.component';
 import { SnakeSkinStore } from '../services/snake-skin.store';
 import { SfxService } from '../services/sfx.service';
+import { SettingsComponent } from '../settings/settings.component';
 
 interface ChallengeGoals {
   targetFruits: number;
@@ -37,6 +38,7 @@ interface ChallengeGoals {
     GameClassicComponent,
     GameSpeedComponent,
     GameChallengeComponent,
+    SettingsComponent,
   ],
   templateUrl: './game-stage.component.html',
   styleUrls: ['./game-stage.component.css'],
@@ -75,14 +77,19 @@ export class GameStageComponent implements OnInit, OnDestroy {
 
   snakeSkin: SnakeSkin;
 
+  isSettingsOpen = false;
+  wasPausedBeforeSettings = false;
+  sfxEnabledUi = true;
+  musicVolumeUi = 50;
+
   @ViewChild(GameClassicComponent) classicRef?: GameClassicComponent;
   @ViewChild(GameSpeedComponent) speedRef?: GameSpeedComponent;
   @ViewChild(GameChallengeComponent) challengeRef?: GameChallengeComponent;
 
-   constructor(
+  constructor(
     private router: Router,
     private skinStore: SnakeSkinStore,
-    private sfx: SfxService 
+    private sfx: SfxService
   ) {
     this.snakeSkin = this.skinStore.get();
   }
@@ -91,12 +98,15 @@ export class GameStageComponent implements OnInit, OnDestroy {
     this.sfx.startMusic();
   };
 
-   ngOnInit() {
-    const st = this.router.getCurrentNavigation()?.extras?.state ?? window.history.state;
+  ngOnInit() {
+    const st =
+      this.router.getCurrentNavigation()?.extras?.state ?? window.history.state;
 
     this.mode = st?.mode ?? this.mode ?? null;
     this.settings = st?.settings ?? this.settings ?? null;
     this.goals = st?.goals ?? this.goals ?? null;
+    this.sfxEnabledUi = this.sfx.getEnabled();
+    this.musicVolumeUi = Math.round(this.sfx.getMusicVolume() * 100);
 
     const incoming = st?.snakeSkin as SnakeSkin | undefined;
     this.snakeSkin = incoming ?? this.skinStore.get();
@@ -104,26 +114,44 @@ export class GameStageComponent implements OnInit, OnDestroy {
     const s = st?.speedSettings as Partial<SpeedModeSettings> | undefined;
     if (s) this.speedSettings = { ...this.speedSettings, ...s };
 
-    if (this.mode === 'speed') this.timeLeft = this.speedSettings.timeAttackSec ?? 0;
+    if (this.mode === 'speed')
+      this.timeLeft = this.speedSettings.timeAttackSec ?? 0;
     if (this.mode === 'challenge') {
       this.timeLeft = this.goals?.targetTime ?? 0;
       this.fruitsRemaining = this.goals?.targetFruits ?? null;
     }
     this.sfx.startMusic();
 
-    window.addEventListener('pointerdown', this.unlockMusic, { once: true, capture: true, passive: true });
-    window.addEventListener('keydown',      this.unlockMusic, { once: true, capture: true });
-    window.addEventListener('touchstart',   this.unlockMusic, { once: true, capture: true, passive: true });
+    window.addEventListener('pointerdown', this.unlockMusic, {
+      once: true,
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener('keydown', this.unlockMusic, {
+      once: true,
+      capture: true,
+    });
+    window.addEventListener('touchstart', this.unlockMusic, {
+      once: true,
+      capture: true,
+      passive: true,
+    });
+
+    const initialSpeed =
+      (this.mode === 'speed'
+        ? this.speedSettings?.startingSpeed
+        : this.settings?.startingSpeed) ?? this.gameSpeed;
+
+    this.gameSpeed = initialSpeed;
   }
 
   ngOnDestroy() {
     this.sfx.stopMusic();
 
     window.removeEventListener('pointerdown', this.unlockMusic, true as any);
-    window.removeEventListener('keydown',      this.unlockMusic, true as any);
-    window.removeEventListener('touchstart',   this.unlockMusic, true as any);
+    window.removeEventListener('keydown', this.unlockMusic, true as any);
+    window.removeEventListener('touchstart', this.unlockMusic, true as any);
   }
-
 
   private activeGame() {
     if (this.mode === 'speed') return this.speedRef;
@@ -133,11 +161,11 @@ export class GameStageComponent implements OnInit, OnDestroy {
 
   onClickHome() {
     this.sfx.playButton();
-    this.sfx.stopMusic(); 
+    this.sfx.stopMusic();
     this.router.navigate(['/']);
   }
-onClickRestart() {
-    this.sfx.playButton(); 
+  onClickRestart() {
+    this.sfx.playButton();
     this.paused = false;
     this.activeGame()?.setPaused(false);
     this.restart.emit();
@@ -154,7 +182,7 @@ onClickRestart() {
   }
 
   onClickPauseToggle() {
-    this.sfx.playButton(); 
+    this.sfx.playButton();
     this.paused = !this.paused;
     this.pauseToggle.emit();
     this.activeGame()?.setPaused(this.paused);
@@ -162,9 +190,8 @@ onClickRestart() {
     else this.sfx.resumeMusic();
   }
 
-
   handleScoreChange(val: number) {
-    const prev = this.score; 
+    const prev = this.score;
     this.score = val;
 
     if (this.mode !== 'challenge' && this.score > this.highScore) {
@@ -183,7 +210,7 @@ onClickRestart() {
     this.gameSpeed = val;
   }
 
- handleGameOver() {
+  handleGameOver() {
     this.sfx.playLose();
     this.paused = true;
     this.activeGame()?.setPaused(true);
@@ -226,7 +253,47 @@ onClickRestart() {
     this.activeGame()?.handleKey(e.key);
   }
 
-  onSnakeSkinChange(skin: typeof this.snakeSkin) {
+  onSnakeSkinChange(skin: SnakeSkin) {
     this.snakeSkin = { ...skin };
+    this.skinStore.set(this.snakeSkin);
+  }
+
+  openSettings() {
+    this.sfx.playButton();
+    if (this.isSettingsOpen) return;
+    this.wasPausedBeforeSettings = this.paused;
+    this.isSettingsOpen = true;
+
+    this.paused = true;
+    this.activeGame()?.setPaused(true);
+    this.sfx.pauseMusic();
+  }
+  closeSettings() {
+  this.sfx.playButton();
+  this.isSettingsOpen = false;
+
+  this.paused = true;
+  this.activeGame()?.setPaused(true);
+  (this.activeGame() as any)?.showPauseOverlay?.();
+
+  this.sfx.pauseMusic();
+}
+
+  onSettingsOverlayClick(e: MouseEvent) {
+    if (e.target === e.currentTarget) this.closeSettings();
+  }
+
+  onSettingsSfxToggled(enabled: boolean) {
+    this.sfxEnabledUi = enabled;
+    this.sfx.setEnabled(enabled);
+  }
+  onSettingsMusicChanged(vol: number) {
+    this.musicVolumeUi = vol; 
+    this.sfx.setMusicVolume(vol / 100); 
+  }
+
+  @HostListener('document:keydown.escape')
+  onEsc() {
+    if (this.isSettingsOpen) this.closeSettings();
   }
 }
