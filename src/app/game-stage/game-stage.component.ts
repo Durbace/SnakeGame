@@ -56,6 +56,8 @@ export class GameStageComponent implements OnInit {
 
   settings: any = null;
 
+  fruitsRemaining: number | null = null;
+
   speedSettings: SpeedModeSettings = {
     startingSpeed: 5,
     accelRate: 1.0,
@@ -85,29 +87,17 @@ export class GameStageComponent implements OnInit {
 
     this.mode = st?.mode ?? this.mode ?? null;
     this.settings = st?.settings ?? this.settings ?? null;
-
     this.goals = st?.goals ?? this.goals ?? null;
 
     const s = st?.speedSettings as Partial<SpeedModeSettings> | undefined;
     if (s) this.speedSettings = { ...this.speedSettings, ...s };
 
-    if (
-      (this.mode === 'classic' || this.mode === 'challenge') &&
-      this.settings?.startingSpeed != null
-    ) {
-      const sp = Math.min(
-        10,
-        Math.max(1, Math.floor(this.settings.startingSpeed))
-      );
-      this.gameSpeed = sp;
-    }
-
     if (this.mode === 'speed') {
       this.timeLeft = this.speedSettings.timeAttackSec ?? 0;
     }
-
     if (this.mode === 'challenge') {
       this.timeLeft = this.goals?.targetTime ?? 0;
+      this.fruitsRemaining = this.goals?.targetFruits ?? null;
     }
   }
 
@@ -146,11 +136,13 @@ export class GameStageComponent implements OnInit {
     this.restart.emit();
     this.activeGame()?.restart();
     this.score = 0;
+
     if (this.mode === 'speed')
       this.timeLeft = this.speedSettings.timeAttackSec || 0;
 
     if (this.mode === 'challenge') {
       this.timeLeft = this.goals?.targetTime || 0;
+      this.fruitsRemaining = this.goals?.targetFruits ?? null;
     }
   }
 
@@ -163,7 +155,13 @@ export class GameStageComponent implements OnInit {
 
   handleScoreChange(val: number) {
     this.score = val;
-    if (this.score > this.highScore) this.highScore = this.score;
+    if (this.mode !== 'challenge' && this.score > this.highScore) {
+      this.highScore = this.score;
+    }
+    if (this.mode === 'challenge' && this.goals?.targetFruits != null) {
+      const total = this.goals.targetFruits;
+      this.fruitsRemaining = Math.max(0, total - this.score);
+    }
   }
   handleHighScoreChange(val: number) {
     this.highScore = val;

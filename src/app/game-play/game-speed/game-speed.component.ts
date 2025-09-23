@@ -330,7 +330,7 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
         this.timeLeftMs = Math.max(0, this.timeLeftMs - this.tickMs);
         this.timeLeftChange.emit(Math.ceil(this.timeLeftMs / 1000));
         if (this.timeLeftMs <= 0) {
-          this.finishGame();
+          this.finishGame('finish');
           return;
         }
       }
@@ -381,7 +381,7 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
       this.fruitsCollected++;
       const target = Number(this.targetFruits ?? 0);
       if (target > 0 && this.fruitsCollected >= target) {
-        this.finishGame();
+        this.finishGame('win');
         return;
       }
 
@@ -394,33 +394,39 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
       !this.wrapEdges &&
       (head.x < 0 || head.x >= this.cols || head.y < 0 || head.y >= this.rows)
     ) {
-      this.finishGame();
+      this.finishGame('lose');
+      return;
+
       return;
     }
 
     for (let i = 1; i < this.snake.length; i++) {
       const p = this.snake[i];
       if (p.x === head.x && p.y === head.y) {
-        this.finishGame();
+        this.finishGame('lose');
+        return;
+
         return;
       }
     }
 
     if (this.obstaclesOn && this.obstacles.has(this.keyOf(head))) {
-      this.finishGame();
+      this.finishGame('lose');
+      return;
+
       return;
     }
 
     this.drawAll();
   }
 
-  private finishGame() {
+  private finishGame(reason: 'win' | 'lose' | 'finish') {
     this.over = true;
     window.clearInterval(this.intervalId);
     this.drawAll();
 
     this.ctx.save();
-    this.ctx.globalAlpha = 0.7;
+    this.ctx.globalAlpha = 0.75;
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(
       0,
@@ -430,25 +436,43 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
     );
     this.ctx.restore();
 
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = 'bold 24px monospace';
+    let title = 'Game Over';
+    let titleColor = '#ffffff';
+    if (reason === 'win') {
+      title = 'You Win!';
+      titleColor = '#22c55e';
+    } else if (reason === 'finish') {
+      title = "Time's Up!";
+      titleColor = '#38bdf8';
+    }
+
     this.ctx.textAlign = 'center';
+
+    this.ctx.fillStyle = titleColor;
+    this.ctx.font = 'bold 28px monospace';
     this.ctx.fillText(
-      'Game Over',
+      title,
       (this.cols * this.cellSize) / 2,
-      (this.rows * this.cellSize) / 2
-    );
-    this.ctx.font = '14px monospace';
-    this.ctx.fillText(
-      'Click to Restart',
-      (this.cols * this.cellSize) / 2,
-      (this.rows * this.cellSize) / 2 + 28
+      (this.rows * this.cellSize) / 2 - 10
     );
 
-    if (this.autoResetOnDeath) {
-      setTimeout(() => this.resetGame(), 500);
-      return;
-    }
+    this.ctx.fillStyle = '#e5e7eb';
+    this.ctx.font = '14px monospace';
+    const cx = (this.cols * this.cellSize) / 2;
+    const cy = (this.rows * this.cellSize) / 2 + 16;
+
+    const lines: string[] = [
+      `Score: ${this.score}`,
+      `Speed: ${this.gameSpeed.toFixed(2)}x`,
+      this.targetFruits
+        ? `Fruits: ${this.fruitsCollected}/${this.targetFruits}`
+        : '',
+      'Click to Restart',
+    ].filter(Boolean);
+
+    lines.forEach((t, i) => {
+      this.ctx.fillText(t, cx, cy + i * 20);
+    });
 
     this.gameOver.emit();
   }

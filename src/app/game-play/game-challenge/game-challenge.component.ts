@@ -13,6 +13,7 @@ import {
 
 type Cell = { x: number; y: number };
 type FruitType = 'normal' | 'toxic' | 'golden' | 'fake';
+type Fruit = { pos: Cell; type: FruitType; expiresAt: number | null };
 
 export interface ChallengeSettings {
   gridSize: number;
@@ -72,9 +73,7 @@ export class GameChallengeComponent
   private vx = 1;
   private vy = 0;
 
-  private food!: Cell;
-  private foodType: FruitType = 'normal';
-  private foodExpiresAt: number | null = null; 
+  private foods: Fruit[] = [];
 
   private obstacles: Cell[] = [];
 
@@ -86,8 +85,13 @@ export class GameChallengeComponent
   private CHANCE_GOLDEN = 0.1;
   private CHANCE_FAKE = 0.08;
 
-  private GOLDEN_LIFETIME_MS = 2000;
+  private GOLDEN_LIFETIME_MS = 3500;
+  private GOLDEN_BLINK_WINDOW_MS = 900; 
   private FAKE_OBSTACLES_ON_PICKUP = 2;
+
+  private MIN_FOODS = 1;
+  private MAX_FOODS_RANGE = 5;
+  private desiredFoods = 3;
 
   private timeLeft = 0;
   private secondTimerId: any = null;
@@ -217,8 +221,11 @@ export class GameChallengeComponent
     this.score = 0;
     this.over = false;
     this.obstacles = [];
-    this.foodExpiresAt = null;
+    this.foods = [];
     this.fruitsCollected = 0;
+
+    this.desiredFoods = this.rollDesiredFoods();
+    this.adjustFruitsToDesired();
 
     if (this.timeLimitSec && this.timeLimitSec > 0) {
       this.startSecondTimer(this.timeLimitSec);
@@ -228,7 +235,6 @@ export class GameChallengeComponent
       window.clearInterval(this.secondTimerId);
     }
 
-    this.spawnFood();
     this.drawAll();
     this.restartInterval();
 
@@ -245,11 +251,16 @@ export class GameChallengeComponent
   }
 
   private tick() {
-    if (this.foodType === 'golden' && this.foodExpiresAt !== null) {
-      if (Date.now() >= this.foodExpiresAt) {
-        this.spawnFood();
+    const now = Date.now();
+    let needRespawn = false;
+    this.foods = this.foods.filter((f) => {
+      if (f.expiresAt !== null && now >= f.expiresAt) {
+        needRespawn = true;
+        return false; 
       }
-    }
+      return true;
+    });
+    if (needRespawn) this.rerollAndAdjustFruits();
 
     const head = { x: this.snake[0].x + this.vx, y: this.snake[0].y + this.vy };
 
@@ -262,15 +273,23 @@ export class GameChallengeComponent
 
     this.snake.unshift(head);
 
-    const ateFood = head.x === this.food.x && head.y === this.food.y;
+    let ateIndex = -1;
+    for (let i = 0; i < this.foods.length; i++) {
+      const f = this.foods[i];
+      if (f.pos.x === head.x && f.pos.y === head.y) {
+        ateIndex = i;
+        break;
+      }
+    }
 
-    if (ateFood) {
-      let counted = false; 
+    if (ateIndex >= 0) {
+      const f = this.foods[ateIndex];
+      let counted = false;
 
-      switch (this.foodType) {
+      switch (f.type) {
         case 'normal':
           this.incrementScore(1);
-          counted = true; 
+          counted = true;
           break;
         case 'toxic':
           this.shrinkSnake(1);
@@ -288,12 +307,13 @@ export class GameChallengeComponent
         this.fruitsCollected++;
         const target = Math.max(0, this.targetFruits ?? 0);
         if (target > 0 && this.fruitsCollected >= target) {
-          this.finishGame();
+          this.finishGame('win');
           return;
         }
       }
 
-      this.spawnFood();
+      this.foods.splice(ateIndex, 1);
+      this.rerollAndAdjustFruits();
     } else {
       this.snake.pop();
     }
@@ -302,34 +322,34 @@ export class GameChallengeComponent
       !this.wrapEdges &&
       (head.x < 0 || head.x >= this.cols || head.y < 0 || head.y >= this.rows)
     ) {
-      this.finishGame();
+      this.finishGame('lose');
       return;
     }
 
     for (let i = 1; i < this.snake.length; i++) {
       const p = this.snake[i];
       if (p.x === head.x && p.y === head.y) {
-        this.finishGame();
+        this.finishGame('lose');
         return;
       }
     }
 
     if (this.obstacles.some((o) => o.x === head.x && o.y === head.y)) {
-      this.finishGame();
+      this.finishGame('lose');
       return;
     }
 
     this.drawAll();
   }
 
-  private finishGame() {
+  private finishGame(reason: 'win' | 'lose' | 'finish') {
     this.over = true;
     window.clearInterval(this.intervalId);
     window.clearInterval(this.secondTimerId);
     this.drawAll();
 
     this.ctx.save();
-    this.ctx.globalAlpha = 0.7;
+    this.ctx.globalAlpha = 0.75;
     this.ctx.fillStyle = '#000';
     this.ctx.fillRect(
       0,
@@ -339,20 +359,40 @@ export class GameChallengeComponent
     );
     this.ctx.restore();
 
-    this.ctx.fillStyle = '#fff';
-    this.ctx.font = 'bold 24px monospace';
+    let title = 'Game Over';
+    let titleColor = '#ffffff';
+    if (reason === 'win') {
+      title = 'You Win!';
+      titleColor = '#22c55e';
+    } else if (reason === 'finish') {
+      title = "Time's Up!";
+      titleColor = '#38bdf8';
+    }
+
     this.ctx.textAlign = 'center';
+    this.ctx.fillStyle = titleColor;
+    this.ctx.font = 'bold 28px monospace';
     this.ctx.fillText(
-      'Game Over',
+      title,
       (this.cols * this.cellSize) / 2,
-      (this.rows * this.cellSize) / 2
+      (this.rows * this.cellSize) / 2 - 10
     );
+
+    this.ctx.fillStyle = '#e5e7eb';
     this.ctx.font = '14px monospace';
-    this.ctx.fillText(
+    const cx = (this.cols * this.cellSize) / 2;
+    const cy = (this.rows * this.cellSize) / 2 + 16;
+
+    const lines: string[] = [
+      `Score: ${this.score}`,
+      this.targetFruits
+        ? `Fruits: ${this.fruitsCollected}/${this.targetFruits}`
+        : '',
+      this.timeLimitSec ? `Time: ${Math.max(0, this.timeLeft)}s` : '',
       'Click to Restart',
-      (this.cols * this.cellSize) / 2,
-      (this.rows * this.cellSize) / 2 + 28
-    );
+    ].filter(Boolean);
+
+    lines.forEach((t, i) => this.ctx.fillText(t, cx, cy + i * 20));
 
     this.gameOver.emit();
   }
@@ -389,7 +429,7 @@ export class GameChallengeComponent
     const used = new Set<string>();
     for (const s of this.snake) used.add(`${s.x},${s.y}`);
     for (const o of this.obstacles) used.add(`${o.x},${o.y}`);
-    if (this.food) used.add(`${this.food.x},${this.food.y}`);
+    for (const f of this.foods) used.add(`${f.pos.x},${f.pos.y}`);
 
     const freeCount = this.cols * this.rows - used.size;
     if (freeCount <= 0) return null;
@@ -407,23 +447,32 @@ export class GameChallengeComponent
     return null;
   }
 
-  private spawnFood() {
-    const r = Math.random();
-    const t = this.pickFruitType(r);
-    this.foodType = t;
+  private adjustFruitsToDesired() {
+    while (this.foods.length < this.desiredFoods) {
+      const f = this.createOneFruit();
+      if (!f) break;
+      this.foods.push(f);
+    }
+    while (this.foods.length > this.desiredFoods) {
+      const idx = Math.floor(Math.random() * this.foods.length);
+      this.foods.splice(idx, 1);
+    }
+  }
 
+  private rerollAndAdjustFruits() {
+    this.desiredFoods = this.rollDesiredFoods();
+    this.adjustFruitsToDesired();
+  }
+
+  private createOneFruit(): Fruit | null {
     const cell = this.randomFreeCell();
-    if (!cell) {
-      this.food = { x: 0, y: 0 };
-    } else {
-      this.food = cell;
-    }
+    if (!cell) return null;
 
-    if (t === 'golden') {
-      this.foodExpiresAt = Date.now() + this.GOLDEN_LIFETIME_MS;
-    } else {
-      this.foodExpiresAt = null;
-    }
+    const t = this.pickFruitType(Math.random());
+    const expiresAt =
+      t === 'golden' ? Date.now() + this.GOLDEN_LIFETIME_MS : null;
+
+    return { pos: cell, type: t, expiresAt };
   }
 
   private pickFruitType(r: number): FruitType {
@@ -452,33 +501,20 @@ export class GameChallengeComponent
       fake: '#f97316',
     };
 
-    if (this.foodType === 'golden' && this.foodExpiresAt) {
-      const remaining = this.foodExpiresAt - Date.now();
-      if (remaining < 600 && remaining > 0) {
-        if (Math.floor(remaining / 100) % 2 === 0) {
-        } else {
-          this.ctx.fillStyle = colorMap[this.foodType];
-          this.ctx.fillRect(
-            this.food.x * this.cellSize,
-            this.food.y * this.cellSize,
-            this.cellSize,
-            this.cellSize
-          );
+    for (const f of this.foods) {
+      let draw = true;
+      if (f.type === 'golden' && f.expiresAt) {
+        const remaining = f.expiresAt - Date.now();
+        if (remaining < this.GOLDEN_BLINK_WINDOW_MS && remaining > 0) {
+          draw = Math.floor(remaining / 120) % 2 === 0 ? false : true;
         }
-      } else {
-        this.ctx.fillStyle = colorMap[this.foodType];
-        this.ctx.fillRect(
-          this.food.x * this.cellSize,
-          this.food.y * this.cellSize,
-          this.cellSize,
-          this.cellSize
-        );
       }
-    } else {
-      this.ctx.fillStyle = colorMap[this.foodType];
+      if (!draw) continue;
+
+      this.ctx.fillStyle = colorMap[f.type];
       this.ctx.fillRect(
-        this.food.x * this.cellSize,
-        this.food.y * this.cellSize,
+        f.pos.x * this.cellSize,
+        f.pos.y * this.cellSize,
         this.cellSize,
         this.cellSize
       );
@@ -554,9 +590,15 @@ export class GameChallengeComponent
         this.timeLeft -= 1;
         this.timeLeftChange.emit(this.timeLeft);
         if (this.timeLeft === 0) {
-          this.finishGame(); 
+          this.finishGame('finish');
         }
       }
     }, 1000);
+  }
+
+  private rollDesiredFoods(): number {
+    const a = Math.max(1, Math.floor(this.MIN_FOODS));
+    const b = Math.max(a, Math.floor(this.MAX_FOODS_RANGE));
+    return Math.floor(Math.random() * (b - a + 1)) + a; 
   }
 }

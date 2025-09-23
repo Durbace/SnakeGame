@@ -105,8 +105,14 @@
       ></app-game-challenge>
 
       <aside class="score-side right">
-        <div class="label">High<br />Score</div>
-        <div class="value">{{ highScore }}</div>
+        <ng-container *ngIf="mode === 'challenge'; else showHighScore">
+          <div class="label">Fruits<br />Left</div>
+          <div class="value">{{ fruitsRemaining ?? "—" }}</div>
+        </ng-container>
+        <ng-template #showHighScore>
+          <div class="label">High<br />Score</div>
+          <div class="value">{{ highScore }}</div>
+        </ng-template>
       </aside>
     </div>
   </main>

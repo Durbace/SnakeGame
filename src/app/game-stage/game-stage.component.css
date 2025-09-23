@@ -319,7 +319,7 @@
 .score-side.left {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* sus, mijloc, jos */
+  justify-content: space-between; 
   align-items: center;
   padding: 16px 8px;
 }
@@ -328,14 +328,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px; /* puțin mai mult spațiu între label și valoare */
+  gap: 4px; 
 }
 
 .score-side.left .label {
   position: static;
   transform: none;
   margin: 0;
-  font-size: 16px; /* mai mare decât 12px */
+  font-size: 16px; 
   font-weight: 600;
   color: var(--muted);
   text-align: center;
@@ -343,7 +343,7 @@
 
 .score-side.left .value {
   flex: 0 0 auto;
-  font-size: 28px; /* mai mare decât 22px */
+  font-size: 28px; 
   font-weight: 800;
   color: var(--glow);
   text-shadow: 0 0 14px rgba(29, 226, 111, 0.45);
