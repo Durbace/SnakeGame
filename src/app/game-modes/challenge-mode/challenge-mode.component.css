@@ -30,9 +30,6 @@
     gap: 18px;
     align-items: start;
   }
-  @media (max-width: 780px) {
-    .challenge-grid { grid-template-columns: 1fr; }
-  }
 
   .classic-left h3 {
     margin: 0 0 10px;

@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  text-align: center; 
+  text-align: center;
 }
 .homepage-bg {
   position: fixed;
@@ -41,11 +41,11 @@
   font-family: "Pixelify Sans", system-ui, -apple-system, Segoe UI, Roboto,
     Arial, sans-serif;
   font-weight: 900;
-  font-size: clamp(72px, 12vw, 160px); 
+  font-size: clamp(72px, 12vw, 160px);
   letter-spacing: 4px;
   color: #0b1220;
   text-transform: uppercase;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); 
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 .tagline {
   margin: 0 0 24px;
@@ -86,7 +86,7 @@
   border: 2px solid #20f73c;
   box-shadow: 0 0 16px rgba(32, 247, 60, 0.7);
 
-  font-size: 28px; 
+  font-size: 28px;
   font-weight: 800;
 }
 .btn-primary:hover {
@@ -132,16 +132,6 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-}
-@media (max-width: 900px) {
-  .mode-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-@media (max-width: 640px) {
-  .mode-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .mode-card {
@@ -251,14 +241,6 @@
   gap: 8px;
 }
 
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 12px 16px;
-  border-top: 1px solid #eef2f7;
-}
-
 .btn-next {
   min-width: 120px;
   min-height: 34px;
@@ -272,7 +254,7 @@
 
 .btn-next .arrow {
   display: inline-flex;
-  width: 22px; 
+  width: 22px;
   height: 22px;
   transition: transform 0.2s ease;
 }
@@ -281,4 +263,52 @@
   transform: translateX(7px);
 }
 
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid #eef2f7;
+}
 
+.btn-back {
+  min-width: 120px;
+  min-height: 34px;
+  padding: 0 14px;
+  font-weight: 800;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-back .arrow {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  transform: rotate(180deg);
+  transition: transform 0.2s ease;
+}
+.btn-back:hover .arrow {
+  transform: rotate(180deg) translateX(7px);
+}
+
+.btn-next {
+  min-width: 120px;
+  min-height: 34px;
+  padding: 0 16px;
+  font-weight: 800;
+  font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.btn-next .arrow {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  transition: transform 0.2s ease;
+}
+.btn-next:hover .arrow {
+  transform: translateX(7px);
+}

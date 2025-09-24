@@ -332,18 +332,18 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
     this.emitInitialStats();
 
     if (this.isSpeedMode) {
-      const secs = Math.ceil(this.timeLeftMs / 1000);
-      Promise.resolve().then(() => this.timeLeftChange.emit(secs));
-    }
+  const secs = Math.ceil(this.timeLeftMs / 1000);
+  setTimeout(() => this.timeLeftChange.emit(secs), 0);
+}
   }
 
   private emitInitialStats() {
-    Promise.resolve().then(() => {
-      this.scoreChange.emit(this.score);
-      this.highScoreChange.emit(this.highScore);
-      this.speedChange.emit(this.gameSpeed);
-    });
-  }
+  setTimeout(() => {
+    this.scoreChange.emit(this.score);
+    this.highScoreChange.emit(this.highScore);
+    this.speedChange.emit(this.gameSpeed);
+  }, 0);
+}
 
   private restartInterval() {
     window.clearInterval(this.intervalId);
@@ -772,17 +772,20 @@ export class GameSpeedComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private resetRoundRuntime() {
-    if (this.isSpeedMode) {
-      const ta = Number(this.speedSettings?.timeAttackSec);
-      this.timeLeftMs =
-        Number.isFinite(ta) && ta > 0 ? Math.floor(ta * 1000) : 0;
+  if (this.isSpeedMode) {
+    const ta = Number(this.speedSettings?.timeAttackSec);
+    this.timeLeftMs = Number.isFinite(ta) && ta > 0 ? Math.floor(ta * 1000) : 0;
 
-      this.gameSpeed = 1;
-      this.recomputeTickFromGameSpeed();
-      this.speedChange.emit(this.gameSpeed);
+    const prev = this.gameSpeed;
+    this.gameSpeed = 1;
+    this.recomputeTickFromGameSpeed();
+
+    if (prev !== this.gameSpeed) {
+      setTimeout(() => this.speedChange.emit(this.gameSpeed), 0);
     }
-    this.lastTickAt = performance.now();
-    this.accelBuffer = 0;
-    this.BASE_TICK_MS = this.tickMs;
   }
+  this.lastTickAt = performance.now();
+  this.accelBuffer = 0;
+  this.BASE_TICK_MS = this.tickMs;
+}
 }

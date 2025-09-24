@@ -25,11 +25,16 @@ export class ClassicModeComponent {
   wrapEdges = false;
   startingLength = 4;
   startingSpeed = 5;
+  
 
   constructor(private router: Router) {}
 
   onNext() {
     this.showSettings = true;
+  }
+  
+  goBack() {
+    this.showSettings = false;
   }
 
   onStartClassic() {

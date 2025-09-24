@@ -20,11 +20,6 @@
   gap: 24px;
   align-items: stretch;
 }
-@media (max-width: 860px) {
-  .howto-grid {
-    grid-template-columns: 1fr;
-  }
-}
 
 .howto-left {
   display: grid;
@@ -136,23 +131,3 @@
   grid-row: 3;
 }
 
-@media (max-width: 420px) {
-  .pad {
-    width: 260px;
-    height: 260px;
-    gap: 14px;
-  }
-  .pad-btn {
-    width: 58px;
-    height: 58px;
-  }
-  .pad-btn svg {
-    width: 24px;
-    height: 24px;
-  }
-  .pad-dot {
-    width: 22px;
-    height: 22px;
-    box-shadow: 0 0 0 6px #fff, 0 1px 2px rgba(0, 0, 0, 0.12);
-  }
-}

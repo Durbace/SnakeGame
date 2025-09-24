@@ -36,6 +36,10 @@ export class ChallengeModeComponent {
     this.showSettings = true;
   }
 
+  goBack() {
+    this.showSettings = false;
+  }
+
   onStartChallenge() {
     const settings: ClassicSettings = {
       gridSize: this.gridSize,

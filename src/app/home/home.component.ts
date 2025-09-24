@@ -298,4 +298,29 @@ export class HomeComponent {
     this.sfx.playButton();
     this.modalType = mode;
   }
+
+  get isOnStartStep(): boolean {
+  return !!(
+    this.classicRef?.isInSettings ||
+    this.speedRef?.isInSettings ||
+    this.challengeRef?.isInSettings
+  );
+}
+
+onBackClick() {
+  this.sfx.playButton();
+
+  if (this.modalType === 'classic' && this.classicRef?.isInSettings) {
+    (this.classicRef as any).goBack?.();
+    return;
+  }
+  if (this.modalType === 'speed' && this.speedRef?.isInSettings) {
+    (this.speedRef as any).goBack?.();
+    return;
+  }
+  if (this.modalType === 'challenge' && this.challengeRef?.isInSettings) {
+    (this.challengeRef as any).goBack?.();
+    return;
+  }
+}
 }

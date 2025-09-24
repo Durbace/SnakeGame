@@ -74,6 +74,26 @@
     </div>
 
     <div class="modal-footer" *ngIf="showsNext">
+      <button
+        class="btn btn-secondary btn-back"
+        *ngIf="isOnStartStep"
+        (click)="onBackClick()"
+      >
+        <span class="arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M5 12h14M13 6l6 6-6 6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+        Back
+      </button>
+
       <button class="btn btn-primary btn-next" (click)="onNextClick()">
         {{
           classicRef?.isInSettings ||
@@ -82,7 +102,6 @@
             ? "Start"
             : "Next"
         }}
-
         <span
           class="arrow"
           *ngIf="

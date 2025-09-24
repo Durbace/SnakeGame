@@ -40,6 +40,10 @@ export class SpeedModeComponent {
     this.settingsStateChange.emit(true);
   }
 
+  goBack() {
+    this.showSettings = false;
+  }
+
   setObstaclePreset(p: ObstaclePreset) {
     if (!this.obstaclesOn) return;
     this.obstaclePreset = p;
