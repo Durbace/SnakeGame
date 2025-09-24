@@ -173,3 +173,38 @@
   color: #0f172a;
   text-align: center;
 }
+
+.mt { margin-top: 18px; }
+
+.fruits {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.fruits li {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.fruit-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.fruit-dot.normal { background: #ef4444; } 
+.fruit-dot.toxic  { background: #7e22ce; } 
+.fruit-dot.golden { background: #eab308; }  
+.fruit-dot.fake   { background: #f97316; } 
+
+.rules .text, .fruits .text {
+  color: #0f172a;
+}
+.rules em { color: #64748b; }

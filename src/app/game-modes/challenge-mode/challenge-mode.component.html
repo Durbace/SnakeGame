@@ -40,6 +40,37 @@
             </span>
           </li>
         </ul>
+
+        <h3 class="mt">Fruit Types</h3>
+        <ul class="fruits">
+          <li>
+            <span class="fruit-dot normal" aria-hidden="true"></span>
+            <span class="text">
+              <strong>Normal</strong> — +1 score, counts as <strong>+1</strong> fruit toward the goal.
+            </span>
+          </li>
+          <li>
+            <span class="fruit-dot golden" aria-hidden="true"></span>
+            <span class="text">
+              <strong>Golden</strong> — +3 score, counts as <strong>+3</strong> fruits toward the goal.
+              Appears briefly and <em>blinks</em> before disappearing.
+            </span>
+          </li>
+          <li>
+            <span class="fruit-dot toxic" aria-hidden="true"></span>
+            <span class="text">
+              <strong>Toxic</strong> — shrinks your snake by <strong>1 segment</strong>. Does not increase score and
+              does <strong>not</strong> count toward the goal.
+            </span>
+          </li>
+          <li>
+            <span class="fruit-dot fake" aria-hidden="true"></span>
+            <span class="text">
+              <strong>Fake</strong> — spawns obstacles on the grid. Does not increase score and
+              does <strong>not</strong> count toward the goal.
+            </span>
+          </li>
+        </ul>
       </div>
 
       <div class="classic-right" aria-hidden="true">
@@ -50,6 +81,7 @@
     </div>
   </div>
 </section>
+
 
 <section class="classic" *ngIf="showSettings">
   <h2 class="classic-title">Challenge Settings</h2>
