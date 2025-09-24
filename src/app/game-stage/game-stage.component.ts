@@ -209,32 +209,50 @@ export class GameStageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/']);
   }
 
-  onClickRestart() {
-    this.sfx.playButton();
+  async onClickRestart() {
+    const wasPaused = this.paused;
+
     this.paused = false;
     this.activeGame()?.setPaused(false);
     this.restart.emit();
     this.activeGame()?.restart();
     this.score = 0;
 
-    if (this.mode === 'speed')
+    if (this.mode === 'speed') {
       this.timeLeft = this.speedSettings.timeAttackSec || 0;
-
+    }
     if (this.mode === 'challenge') {
       this.timeLeft = this.goals?.targetTime || 0;
       this.fruitsRemaining = this.goals?.targetFruits ?? null;
     }
 
+    if (wasPaused) {
+      await this.sfx.playMusic();
+      await Promise.resolve();
+    }
+
+    this.sfx.playButton();
+
     this.persistCurrentModeSettings();
   }
 
-  onClickPauseToggle() {
-    this.sfx.playButton();
-    this.paused = !this.paused;
+  async onClickPauseToggle() {
+    const goingToPause = !this.paused;
+
+    this.paused = goingToPause;
     this.pauseToggle.emit();
     this.activeGame()?.setPaused(this.paused);
-    if (this.paused) this.sfx.pauseMusic();
-    else this.sfx.resumeMusic();
+
+    if (this.paused) {
+      this.sfx.pauseMusic();
+      this.sfx.playButton();
+    } else {
+      await this.sfx.playMusic();
+
+      await Promise.resolve();
+
+      this.sfx.playButton();
+    }
   }
 
   handleScoreChange(val: number) {
@@ -264,7 +282,6 @@ export class GameStageComponent implements OnInit, OnDestroy {
   }
 
   handleRequestedRestart() {
-    this.sfx.playButton();
     this.onClickRestart();
   }
 
@@ -286,9 +303,7 @@ export class GameStageComponent implements OnInit, OnDestroy {
     const key = e.key.toLowerCase();
 
     if (
-      ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(
-        e.key.toLowerCase()
-      )
+      ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(key)
     ) {
       e.preventDefault();
     }
@@ -322,18 +337,20 @@ export class GameStageComponent implements OnInit, OnDestroy {
   }
 
   closeSettings() {
-    this.sfx.playButton();
-    this.isSettingsOpen = false;
+  this.sfx.playButton();
+  this.isSettingsOpen = false;
 
-    this.paused = true;
-    this.activeGame()?.setPaused(true);
-    (this.activeGame() as any)?.showPauseOverlay?.();
+  this.paused = true;
+  this.activeGame()?.setPaused(true);
 
-    this.sfx.pauseMusic();
+  (this.activeGame() as any)?.showPauseOverlay?.();
 
-    this.persistCurrentModeSettings();
-    this.persistAudioPrefs();
-  }
+  this.sfx.pauseMusic();
+
+  this.persistCurrentModeSettings();
+  this.persistAudioPrefs();
+}
+
 
   onSettingsOverlayClick(e: MouseEvent) {
     if (e.target === e.currentTarget) this.closeSettings();
@@ -351,10 +368,18 @@ export class GameStageComponent implements OnInit, OnDestroy {
     this.persistAudioPrefs();
   }
 
-  @HostListener('document:keydown.escape')
-  onEsc() {
-    if (this.isSettingsOpen) this.closeSettings();
+  @HostListener('document:keydown.escape', ['$event'])
+  @HostListener('document:keydown.escape', ['$event'])
+onEsc(e?: KeyboardEvent) {
+  e?.preventDefault();
+
+  if (this.isSettingsOpen) {
+    this.closeSettings();
+    return;
   }
+
+  this.onClickPauseToggle();
+}
 
   private persistAudioPrefs() {
     try {
